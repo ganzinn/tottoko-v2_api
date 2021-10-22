@@ -1,0 +1,61 @@
+# Doc: https://docs.docker.com/compose/compose-file/compose-versioning/
+version: "3.8"
+
+# サービス(= コンテナ)
+services:
+  # 開発時のみ使用
+  db:
+    # AWS RDSのバージョンに合わせる
+    image: mysql:8.0.25
+    # 環境変数を定義
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    # ボリューム定義
+    volumes:
+      # コンテナ専用領域と紐付け。db_dataは下記volumesで定義。
+      - db_data:/var/lib/mysql
+    # 認証方式を8系以前のものに変更(AWS RDSデフォルト設定)
+    command: --default-authentication-plugin=mysql_native_password
+    # 公開用ポートを指定
+    ports:
+      # xx:yy:zz形式
+      #  -xx:ホスト側ポートへの接続を許可する接続元IP。
+      #      ※ローカル環境以外からはアクセスできないようローカルループバックアドレスを指定
+      #  -yy:ホスト側ポート（公開用ポート）
+      #  -zz:コンテナ側ポート
+      - "127.0.0.1:${DB_PORT}:3306"
+    # プロセス優先度をあげ、Square pro使用時のDB警告回避
+    cap_add:
+      - SYS_NICE
+
+  api:
+    # ベースイメージとなるDockerfileを指定
+    build:
+      # Dockerfileの格納先
+      context: .
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      FRONT_URL: ${FRONT_URL}
+      RAILS_ENV: ${RAILS_ENV}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
+    volumes:
+      # ホスト側:コンテナ側
+      - ".:/app"
+    ports:
+      # yy:zz形式
+      #  -yy:ホスト側ポート（公開用ポート）
+      #  -zz:コンテナ側ポート
+      - "${API_PORT}:3000"
+    # サービスの依存関係を定義(起動の順番)
+    depends_on:
+      - db
+    # デバック用設定
+    stdin_open: true
+    tty: true
+
+volumes:
+  db_data:
