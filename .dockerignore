@@ -1,4 +1,26 @@
+# Ignore bundler config.
+.bundle
+
+# Ignore all logfiles and tempfiles.
+log/*
+tmp/*
+
+# Ignore pidfiles
+!tmp/pids/
+tmp/pids/*
+
+# Ignore uploaded files in development.
+storage/*
+.byebug_history
+
+.git
+.gitattributes
+.gitignore
+.dockerignore
 .env
 docker-compose.yml
 Dockerfile
 README.md
+
+.DS_Store
+.ash_history
