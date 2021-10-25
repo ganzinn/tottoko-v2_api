@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # バリデーション前処理
+  before_validation :downcase_email
+
   # gem bcryptメソッド
   has_secure_password
 
@@ -9,7 +12,12 @@ class User < ApplicationRecord
                       allow_blank: true # nil, 空白文字の場合スキップ（presenceとの重複回避のため）
                     }
   
-  VALID_PASSWORD_REGEX = /\A[\w\-]*\z/.freeze
+  validates :email, presence: true,
+                    email: {            # カスタムバリデーション呼び出し
+                      allow_blank: true
+                    }
+
+  VALID_PASSWORD_REGEX = Regexp.new( '\A[a-zA-Z0-9\-_]*\z' )
   validates :password,  presence: true,               # 空白文字を許容しない（allow_nillによりnilは許容される）
                         length: { 
                           minimum: 8,                 # 最小文字数
@@ -21,4 +29,17 @@ class User < ApplicationRecord
                         },
                         allow_nil: true               # nilを許容（新規登録時はbcryptの必須入力が有効となるため、更新時のための設定）
   
+  # methods -------------------------------------------------------------------
+  # 自分以外の同じemailのアクティブなユーザーがいる場合にtrueを返す
+  def email_activated?
+    User.where(email: email, activated: true).where.not(id: id).take.present?
+  end
+  
+  private
+
+    # email小文字化
+    def downcase_email
+      self.email.downcase! if email
+    end
+
 end
