@@ -20,6 +20,8 @@ group :development, :test do
 
   # ▼追加 ---------------------------------------------
   gem 'pry-rails' 
+  gem 'rspec-rails', '~> 5.0.0'
+  gem 'factory_bot_rails'
   # ▲ -------------------------------------------------
 
 end
