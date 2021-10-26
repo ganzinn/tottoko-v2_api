@@ -28,6 +28,9 @@ class User < ApplicationRecord
                           message: :format_invalid
                         },
                         allow_nil: true               # nilを許容（新規登録時はbcryptの必須入力が有効となるため、更新時のための設定）
+                                                      # ただし、本設定に関係なくpassword_confirmationは新規登録時でもnilを許容するため、
+                                                      # フロント側では必須入力とする。
+                                                      # ※ APIとしてはpassword_confirmationはnil許容でも問題ないという考え。
   
   # methods -------------------------------------------------------------------
   # 自分以外の同じemailのアクティブなユーザーがいる場合にtrueを返す
