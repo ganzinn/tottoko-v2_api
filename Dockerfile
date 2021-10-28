@@ -35,7 +35,7 @@ RUN apk add --no-cache \
             && \
     #  --virtual 名前（任意） : 削除用パッケージの名前付け
     apk add --virtual build-dependencies --no-cache \
-            build-base \
+            alpine-sdk \
             && \
     # bundlerによるGemのインストールコマンド
     # --jobs=4 : 並列インストールによるGemインストールの高速化
