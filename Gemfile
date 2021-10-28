@@ -50,3 +50,5 @@ gem 'rack-cors'
 # ■その他追加
 # マスターデータの管理に使用
 gem 'active_hash'
+# リフレッシュトークンに使用
+gem 'jwt', '~> 2.3'
