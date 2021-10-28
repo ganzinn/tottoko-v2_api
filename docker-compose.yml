@@ -40,6 +40,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: ${DB_HOST}
       FRONT_URL: ${FRONT_URL}
+      API_URL: ${API_URL}
       RAILS_ENV: ${RAILS_ENV}
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
     volumes:
