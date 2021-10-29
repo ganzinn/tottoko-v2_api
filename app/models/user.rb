@@ -43,6 +43,17 @@ class User < ApplicationRecord
     User.where(email: email, activated: true).where.not(id: id).take.present?
   end
   
+  # フィフレッシュトークンのJWT IDを登録する
+  def remember(jti)
+    # 【TODO】書き換えでなく、別端末からのログインも許容できるよう、ログイン単位のjtiを記憶できるようにする。
+    update!(refresh_jti: jti)
+  end
+
+  # フィフレッシュトークンのJWT IDを削除する
+  def forget
+    update!(refresh_jti: nil)
+  end
+
   private
 
     # email小文字化
