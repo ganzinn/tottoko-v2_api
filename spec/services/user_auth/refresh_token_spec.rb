@@ -31,8 +31,8 @@ RSpec.describe UserAuth::RefreshToken, type: :model do
       end
       it 'payload[:sub]の値がトークンのインスタンス変数user_idと同じであること' do
         payload_sub = @encode_payload[:sub]
-        user_id = @encode_token_instance.user_id
-        expect(payload_sub).to match(user_id)
+        encode_user_id = @encode_token_instance.encode_user_id
+        expect(payload_sub).to match(encode_user_id)
       end
     end
     context 'デコード時' do
@@ -44,11 +44,11 @@ RSpec.describe UserAuth::RefreshToken, type: :model do
         token_user = @decode_token_instance.entity_for_user
         expect(token_user).to match(@user)
       end
-      it '有効期限切れのトークンの場合、例外(JWT::ExpiredSignature)が発生すること' do
+      it '有効期限切れのトークンの場合、例外(JWT::ExpiredSignature)を発生させ、messageが「Signature has expired」となること' do
         travel_to (@lifetime.from_now) do
           expect do
             UserAuth::RefreshToken.new(token: @encode_token_instance.token)
-          end.to raise_error(JWT::ExpiredSignature)
+          end.to raise_error(JWT::ExpiredSignature, "Signature has expired")
         end
       end
       it 'トークンが書き換えられた場合、例外（JWT::VerificationError）が発生し、messageが「Signature verification raised」となること' do

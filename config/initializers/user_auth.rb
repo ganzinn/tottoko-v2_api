@@ -32,11 +32,6 @@ module UserAuth
   mattr_accessor :token_secret_signature_key
   self.token_secret_signature_key = Rails.application.credentials.secret_key_base
 
-  # 署名・検証に使用する公開鍵(RS256)
-  # 今回は使用なし → nil
-  mattr_accessor :token_public_key
-  self.token_public_key = nil
-
   # ユーザーが見つからない場合のエラーを指定
   # 【TODO】401:unauthorizedへ変更
   mattr_accessor :not_found_exception_class

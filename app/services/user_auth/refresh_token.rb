@@ -4,40 +4,39 @@ module UserAuth
   class RefreshToken
     include TokenCommons
 
-    attr_reader :user_id, :payload, :token
+    attr_reader :token, :encode_user_id, :payload
 
-    def initialize(user_id: nil, token: nil)
+    # 使用する引数：
+    #  decode：   token
+    #  ecode ：   user_id
+    def initialize(token: nil, user_id: nil)
       if token.present?
         # decode
         @token = token
-        # [{payload}, {header}]
         @payload = JWT.decode(@token.to_s, decode_key, true, verify_claims).first
-        @user_id = get_user_id_from(@payload)
+        @encode_user_id = get_user_id_from(@payload)
       else
         # encode
-        @user_id = encrypt_for(user_id)
+        @encode_user_id = encrypt_for(user_id)
         @payload = claims
-        @token = JWT.encode(@payload, secret_key, algorithm, header_fields)
+        @token = JWT.encode(@payload, encode_key, algorithm, header_fields)
         remember_jti(user_id)
       end
     end
 
     # 暗号化されたuserIDからユーザーを取得する
     def entity_for_user(id = nil)
-      id ||= @user_id
+      id ||= @encode_user_id
       User.find(decrypt_for(id))
     end
 
     private
 
-      # リフレッシュトークンの有効期限
-      def token_lifetime
-        UserAuth.refresh_token_lifetime
-      end
+      ## エンコードメソッド
 
       # 有効期限をUnixtimeで返す(必須)
       def token_expiration
-        token_lifetime.from_now.to_i
+        UserAuth.refresh_token_lifetime.from_now.to_i
       end
 
       # jwt_idの生成(必須)
@@ -50,7 +49,7 @@ module UserAuth
       # エンコード時のデフォルトクレーム
       def claims
         {
-          user_claim => @user_id,
+          user_claim => @encode_user_id,
           jti: jwt_id,
           exp: token_expiration
         }
@@ -66,13 +65,13 @@ module UserAuth
         User.find(user_id).remember(payload_jti)
       end
 
-      ##  デコードメソッド
+      ## デコードメソッド
 
       # デコード時のjwt_idを検証する(エラーはJWT::DecodeErrorに委託する)
       def verify_jti?(jti, payload)
-        user_id = get_user_id_from(payload)
-        decode_user = entity_for_user(user_id)
-        decode_user.refresh_jti == jti
+        encode_user_id = get_user_id_from(payload)
+        user = entity_for_user(encode_user_id)
+        user.refresh_jti == jti
       rescue UserAuth.not_found_exception_class
         false
       end
