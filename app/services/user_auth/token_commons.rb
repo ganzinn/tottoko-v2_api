@@ -8,7 +8,7 @@ module UserAuth
         UserAuth.token_secret_signature_key
       end
     
-      # デコードキー
+      # デコードキー（共通鍵のためencode_keyと同じ）
       def decode_key
         UserAuth.token_secret_signature_key
       end
@@ -46,9 +46,9 @@ module UserAuth
       end
     
       # user_id復号(復号エラーの場合はnilを返す)
-      def decrypt_for(user_id)
-        return unless user_id
-        crypt.decrypt_and_verify(user_id.to_s, purpose: :authorization)
+      def decrypt_for(encode_user_id)
+        return unless encode_user_id
+        crypt.decrypt_and_verify(encode_user_id.to_s, purpose: :authorization)
       rescue
         nil
       end

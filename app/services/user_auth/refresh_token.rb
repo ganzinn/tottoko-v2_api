@@ -70,8 +70,9 @@ module UserAuth
       # デコード時のjwt_idを検証する(エラーはJWT::DecodeErrorに委託する)
       def verify_jti?(jti, payload)
         encode_user_id = get_user_id_from(payload)
-        user = entity_for_user(encode_user_id)
+        user = entity_for_user(encode_user_id) # not_found_exception
         user.refresh_jti == jti
+        # user.refresh_jti[encode_user_id] && user.refresh_jti[encode_user_id]['jti'] == jit
       rescue UserAuth.not_found_exception_class
         false
       end
