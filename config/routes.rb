@@ -5,6 +5,11 @@ Rails.application.routes.draw do
       resources :hello, only: [:index]
       # users_controller
       resources :users, only: [:index]
+
+      resources :auth_token, only: [:create] do
+        post :refresh, on: :collection
+        delete :destroy, on: :collection
+      end
     end
   end
 end

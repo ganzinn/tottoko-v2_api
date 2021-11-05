@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  # Token生成モジュール
+  include UserAuth::TokenGenerate
+
   # バリデーション前処理
   before_validation :downcase_email
 
@@ -38,20 +41,32 @@ class User < ApplicationRecord
                                   # ※ APIとしてはpassword_confirmationはnil許容でも問題ないという考え。
   
   # methods -------------------------------------------------------------------
+  class << self
+    # emailからアクティブなユーザーを返す(= ログインユーザー)
+    def find_by_activated(email)
+      find_by(email: email, activated: true)
+    end
+  end
+
   # 自分以外の同じemailのアクティブなユーザーがいる場合にtrueを返す
   def email_activated?
     User.where(email: email, activated: true).where.not(id: id).take.present?
   end
   
-  # フィフレッシュトークンのJWT IDを登録する
+  # フレッシュトークンのJWT IDを登録する
   def remember(jti)
     # 【TODO】書き換えでなく、別端末からのログインも許容できるよう、ログイン単位のjtiを記憶できるようにする。
     update!(refresh_jti: jti)
   end
 
-  # フィフレッシュトークンのJWT IDを削除する
+  # フレッシュトークンのJWT IDを削除する
   def forget
     update!(refresh_jti: nil)
+  end
+
+  # 共通のJSONレスポンス
+  def response_json(payload = {})
+    as_json(only: [:id, :name]).merge(payload).with_indifferent_access
   end
 
   private
