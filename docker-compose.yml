@@ -43,6 +43,7 @@ services:
       API_URL: ${API_URL}
       RAILS_ENV: ${RAILS_ENV}
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
+      COOKIES_SAME_SITE: ${COOKIES_SAME_SITE}
     volumes:
       # ホスト側:コンテナ側
       - ".:/app"
