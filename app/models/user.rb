@@ -66,7 +66,14 @@ class User < ApplicationRecord
 
   # 共通のJSONレスポンス
   def response_json(payload = {})
-    as_json(only: [:id, :name]).merge(payload).with_indifferent_access
+    as_json(only: [:name, :email]).merge(payload).with_indifferent_access
+  end
+
+  # アカウントアクティベイト用トークン生成＆メール送付
+  def send_activation_email
+    lifetime = 1.hours
+    activate_token = self.encode_access_token({lifetime: lifetime, obj: :account_activation}).token
+    UserMailer.account_activation(self, lifetime, activate_token).deliver_now
   end
 
   private

@@ -1,18 +1,15 @@
 class Api::V1::AuthController < ApplicationController
   include UserAuth::UserSessionize
 
-  # 404エラーが発生した場合にヘッダーのみを返す
-  rescue_from UserAuth.not_found_exception_class, with: :not_found
-  # refresh_tokenのInvalidJitErrorが発生した場合はカスタムエラーを返す
+  rescue_from UserAuth.not_found_exception_class, with: :unauthorized
   rescue_from JWT::InvalidJtiError, with: :invalid_jti
 
-  # session_userを取得、存在しない場合は401を返す
-  before_action :sessionize_user, only: [:refresh, :logout]
+  before_action :sessionize_user, only: [:refresh]
+  before_action :authenticate_user, only: [:logout]
 
   def login
     authenticate
-    delete_session
-    @user = login_user
+    @user = target_user
     set_refresh_token_to_cookie
     render json: login_response
   end
@@ -24,27 +21,47 @@ class Api::V1::AuthController < ApplicationController
   end
 
   def logout
-    delete_session if session_user.forget
-    cookies[session_key].nil? ?
-      head(:ok) : response_500("Could not delete session")
+    current_user.forget
+    delete_session
+    if cookies[session_key].nil?
+      head(:ok)
+    else
+      response_500("セッション削除に失敗しました")
+    end
+  end
+
+  def activate
+    activate_token = params.require(:token)
+    activate_token_ins = User.decode_access_token(activate_token)
+    @user = activate_token_ins.entity_for_user
+    payload_obj = activate_token_ins.payload["obj"]
+    if @user.activated == false && payload_obj == "account_activation"
+      @user.update_attribute(:activated, true)
+      delete_session
+      set_refresh_token_to_cookie
+      render json: login_response
+    else
+      invalid_url
+    end
+  rescue UserAuth.not_found_exception_class,JWT::DecodeError, JWT::EncodeError
+    invalid_url
   end
 
   private
 
     # params[:email]からアクティブなユーザーを返す
-    def login_user
-      @_login_user ||= User.find_by_activated(auth_params[:email])
+    def target_user
+      @_target_user ||= User.find_by_activated(auth_params[:email])
     end
 
     # ログインユーザーが居ない、もしくはpasswordが一致しない場合404を返す
     def authenticate
-      unless login_user.present? &&
-              login_user.authenticate(auth_params[:password])
+      unless target_user.present? && target_user.authenticate(auth_params[:password])
         raise UserAuth.not_found_exception_class
       end
     end
 
-    # refresh_tokenをcookieにセットする
+    # refresh_tokenを再生成し、cookieにセットする
     def set_refresh_token_to_cookie
       cookies[session_key] = {
         value: refresh_token,
@@ -57,9 +74,11 @@ class Api::V1::AuthController < ApplicationController
     # ログイン時のデフォルトレスポンス
     def login_response
       {
+        success: true,
         token: access_token,
         expires: access_token_expiration,
-        user: @user.response_json(sub: access_token_subject)
+        # user: @user.response_json(sub: access_token_subject)
+        user: @user.response_json
       }
     end
 
@@ -93,24 +112,25 @@ class Api::V1::AuthController < ApplicationController
       encode_access_token.payload[:exp]
     end
 
-    # アクセストークンのsubjectクレーム
-    def access_token_subject
-      encode_access_token.payload[:sub]
+    def decode_access_token(token)
+      @_decode_access_token ||= User.decode_access_token(token)
     end
 
-    # 404ヘッダーのみの返却を行う
-    # Doc: https://gist.github.com/mlanett/a31c340b132ddefa9cca
-    def not_found
-      head(:not_found)
+    def unauthorized
+      response_401("ユーザー認証に失敗しました。")
     end
 
     # decode jti != user.refresh_jti のエラー処理
     def invalid_jti
-      msg = "Invalid jti for refresh token"
-      render status: 401, json: { status: 401, error: msg }
+      response_401("セッションが更新されたため、以前のセッションは破棄されました。")
+    end
+
+    def invalid_url
+      response_401("無効なURLです。")
     end
 
     def auth_params
       params.require(:auth).permit(:email, :password)
     end
+
 end
