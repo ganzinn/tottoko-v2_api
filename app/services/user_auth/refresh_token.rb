@@ -8,17 +8,17 @@ module UserAuth
 
     # 使用する引数：
     #  decode：   token
-    #  ecode ：   user_id
+    #  encode：   user_id
     def initialize(token: nil, user_id: nil)
       if token.present?
         # decode
         @token = token
-        @payload = JWT.decode(@token.to_s, decode_key, true, verify_claims).first
+        @payload = JWT.decode(@token.to_s, decode_key, true, verify_payload).first
         @encode_user_id = get_user_id_from(@payload)
       else
         # encode
         @encode_user_id = encrypt_for(user_id)
-        @payload = claims
+        @payload = default_payload
         @token = JWT.encode(@payload, encode_key, algorithm, header_fields)
         remember_jti(user_id)
       end
@@ -32,26 +32,28 @@ module UserAuth
 
     private
 
-      ## エンコードメソッド
+      ## エンコードメソッド ------------------------------
 
-      # 有効期限をUnixtimeで返す(必須)
+      # 有効期限をUnixtimeで返す
       def token_expiration
         UserAuth.refresh_token_lifetime.from_now.to_i
       end
 
-      # jwt_idの生成(必須)
+      # jwt_idの生成
       # Digest::MD5.hexdigest => 複合不可のハッシュを返す
       # SecureRandom.uuid => 一意性の値を返す
       def jwt_id
         Digest::MD5.hexdigest(SecureRandom.uuid)
       end
 
-      # エンコード時のデフォルトクレーム
-      def claims
+      # エンコード時のデフォルトペイロード
+      def default_payload
         {
           user_claim => @encode_user_id,
-          jti: jwt_id,
-          exp: token_expiration
+          exp: token_expiration,
+          iss: token_issuer,
+          aud: token_audience,
+          jti: jwt_id
         }
       end
 
@@ -65,7 +67,7 @@ module UserAuth
         User.find(user_id).remember(payload_jti)
       end
 
-      ## デコードメソッド
+      ## デコードメソッド --------------------------------
 
       # デコード時のjwt_idを検証する(エラーはJWT::DecodeErrorに委託する)
       def verify_jti?(jti, payload)
@@ -77,16 +79,15 @@ module UserAuth
         false
       end
 
-      # デコード時のデフォルトオプション
-      # Doc: https://github.com/jwt/ruby-jwt
-      # default: https://www.rubydoc.info/github/jwt/ruby-jwt/master/JWT/DefaultOptions
-      def verify_claims
+      # ペイロードの検証
+      # ruby-jwtのデフォルト検証: https://www.rubydoc.info/github/jwt/ruby-jwt/master/JWT/DefaultOptions
+      def verify_payload
         {
-          verify_expiration: true,           # 有効期限の検証するか(必須)
+          verify_expiration: true,           # 有効期限の検証(必須)
+          algorithm: algorithm,              # decode時のアルゴリズムの検証（必須）
           verify_jti: proc { |jti, payload|  # トークンのjtiとテーブルのjtiの検証
             verify_jti?(jti, payload)
-          },
-          algorithm: algorithm               # decode時のアルゴリズム
+          }
         }
       end
   end

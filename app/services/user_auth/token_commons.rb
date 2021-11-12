@@ -22,6 +22,16 @@ module UserAuth
       def user_claim
         UserAuth.user_claim
       end
+
+      # issuerを返す
+      def token_issuer
+        UserAuth.token_issuer
+      end
+
+      # audienceを返す
+      def token_audience
+        UserAuth.token_audience
+      end
     
       # キーがハッシュでも文字列でもuser_claimの値を返す
       def get_user_id_from(payload)

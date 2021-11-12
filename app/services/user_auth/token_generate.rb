@@ -5,6 +5,11 @@ module UserAuth
     end
 
     module ClassMethods
+      # アクセストークンのインスタンス生成(オプション => type: )
+      def decode_access_token(token)
+        AccessToken.new(token: token)
+      end
+      
       # アクセストークンのuserを返す
       def from_access_token(token)
         AccessToken.new(token: token).entity_for_user
@@ -17,8 +22,8 @@ module UserAuth
     end
   
     # アクセストークンのインスタンス生成(期限変更 => lifetime: 10.minute)
-    def encode_access_token(payload = {})
-      AccessToken.new(user_id: id, payload: payload)
+    def encode_access_token(option_payload = {})
+      AccessToken.new(user_id: id, option_payload: option_payload)
     end
   
     # リフレッシュトークンのインスタンス生成

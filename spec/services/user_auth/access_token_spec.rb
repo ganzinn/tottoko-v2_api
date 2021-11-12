@@ -35,17 +35,10 @@ RSpec.describe UserAuth::AccessToken, type: :model do
         payload_exp = @payload[:exp]
         expect(payload_exp).to be_within(1).of(30.minute.from_now.to_i)
       end
-      it '有効期限がデフォルト設定の時、lifetime_textメソッドは「30分」と出力すること' do
-        expect(@encode_token_instance.lifetime_text).to match("30分")
-      end
       it '有効期限を1時間に設定した時、payload[:exp]の値が1時間後（誤差1秒以内）であること' do
-        @encode_token_instance = UserAuth::AccessToken.new(user_id: @user.id, payload: {lifetime: 1.hour})
+        @encode_token_instance = UserAuth::AccessToken.new(user_id: @user.id, option_payload: {lifetime: 1.hour})
         payload_exp = @payload[:exp]
         expect(payload_exp).to be_within(1).of(30.minute.from_now.to_i)
-      end
-      it '有効期限を1時間に設定した時、lifetime_textメソッドは「1時間」と出力すること' do
-        @encode_token_instance = UserAuth::AccessToken.new(user_id: @user.id, payload: {lifetime: 1.hour})
-        expect(@encode_token_instance.lifetime_text).to match("1時間")
       end
       it 'payload[:sub]の値がencode_user_idであること' do
         payload_sub = @payload[:sub]

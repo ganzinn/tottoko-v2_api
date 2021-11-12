@@ -8,18 +8,18 @@ module UserAuth
 
     # 使用する引数：
     #  decode：   token
-    #  ecode ：   user_id, payload（任意） ※新規登録のメール認証時のみpayloadにlifetimeを設定することで有効期限を延長できるよう設置。
-    def initialize(token: nil, user_id: nil, payload: {})
+    #  encode：   user_id, option_payload（任意）
+    def initialize(token: nil, user_id: nil, option_payload: {})
       if token.present?
         # decode
         @token = token
-        @payload = JWT.decode(@token.to_s, decode_key, true, verify_claims).first
+        @payload = JWT.decode(@token.to_s, decode_key, true, verify_payload).first
         @encode_user_id = get_user_id_from(@payload)
       else
         # encode
         @encode_user_id = encrypt_for(user_id)
-        @lifetime = payload[:lifetime] || UserAuth.access_token_lifetime
-        @payload = claims.merge(payload.except(:lifetime))
+        @lifetime = option_payload[:lifetime] || UserAuth.access_token_lifetime
+        @payload = default_payload.merge(option_payload.except(:lifetime))
         @token = JWT.encode(@payload, encode_key, algorithm, header_fields)
       end
     end
@@ -29,50 +29,34 @@ module UserAuth
       User.find(decrypt_for(@encode_user_id))
     end
 
-    # @lifetimeの日本語テキストを返す
-    def lifetime_text
-      time, period = @lifetime.inspect.sub(/s\z/, "").split
-      time + I18n.t("datetime.periods.#{period}", default: "")
-    end
-
     private
 
-      ## エンコードメソッド
+      ## エンコードメソッド ------------------------------
 
-      # 有効期限をUnixtimeで返す(必須)
+      # 有効期限をUnixtimeで返す
       def token_expiration
         @lifetime.from_now.to_i
       end
 
-      # issuerを返す
-      def token_issuer
-        UserAuth.token_issuer
-      end
-
-      # audienceを返す
-      def token_audience
-        UserAuth.token_audience
-      end
-
-      # エンコード時のデフォルトクレーム
-      def claims
-        _claims = {}
-        _claims[:exp] = token_expiration
-        _claims[user_claim] = @encode_user_id
-        _claims[:iss] = token_issuer if token_issuer.present?
-        _claims[:aud] = token_audience if token_audience.present?
-        _claims
-      end
-
-      ## デコードメソッド
-
-      # デコード時のデフォルトオプション
-      # Doc: https://github.com/jwt/ruby-jwt
-      # default: https://www.rubydoc.info/github/jwt/ruby-jwt/master/JWT/DefaultOptions
-      def verify_claims
+      # エンコード時のデフォルトペイロード
+      def default_payload
         {
-          verify_expiration: true, # 有効期限の検証
-          algorithm: algorithm     # decode時のアルゴリズム
+          user_claim => @encode_user_id,
+          exp: token_expiration,
+          iss: token_issuer,
+          aud: token_audience,
+          obj: :user_authenticate         # user_authenticate以外の用途（account_activationなど）でトークン発行の場合はencode時「option_payload」で上書き
+        }
+      end
+
+      ## デコードメソッド --------------------------------
+
+      # ペイロードの検証
+      # ruby-jwtのデフォルト検証: https://www.rubydoc.info/github/jwt/ruby-jwt/master/JWT/DefaultOptions
+      def verify_payload
+        {
+          verify_expiration: true, # 有効期限の検証（必須）
+          algorithm: algorithm     # decode時のアルゴリズムの検証（必須）
         }
       end
   end

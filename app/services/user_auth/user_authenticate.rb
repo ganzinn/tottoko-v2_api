@@ -12,10 +12,21 @@ module UserAuth
       def token_from_request_headers
         request.headers["Authorization"]&.split&.last
       end
-  
+
+      # トークンインスタンス生成（デコード）
+      def decode_access_token_ins(token)
+        @_decode_access_token_ins ||= User.decode_access_token(token)
+      end
+
       # access_tokenから有効なユーザーを取得する
       def fetch_user_from_access_token
-        User.from_access_token(token_from_request_headers)
+        token_ins = decode_access_token_ins(token_from_request_headers)
+        payload_obj = token_ins.payload["obj"]
+        if payload_obj == "user_authenticate" # トークン用途検証
+          token_ins.entity_for_user
+        else
+          nil
+        end
       rescue UserAuth.not_found_exception_class, JWT::DecodeError, JWT::EncodeError
         nil
       end
@@ -29,7 +40,8 @@ module UserAuth
       # 認証エラー
       def unauthorized_user
         cookies.delete(UserAuth.session_key)
-        head(:unauthorized)
+        msg = "認証情報が不正です。"
+        render status: 401, json: { success: false, error: msg }
       end
   end
 end
