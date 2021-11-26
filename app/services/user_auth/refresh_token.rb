@@ -1,94 +1,65 @@
-require 'jwt'
-
 module UserAuth
   class RefreshToken
-    include TokenCommons
 
-    attr_reader :token, :encode_user_id, :payload
+    @@token_ins = UserAuth::TokenBase.new(:refresh)
 
-    # 使用する引数：
-    #  decode：   token
-    #  encode：   user_id
-    def initialize(token: nil, user_id: nil)
-      if token.present?
-        # decode
-        @token = token
-        @payload = JWT.decode(@token.to_s, decode_key, true, verify_payload).first
-        @encode_user_id = get_user_id_from(@payload)
-      else
-        # encode
-        @encode_user_id = encrypt_for(user_id)
-        @payload = default_payload
-        @token = JWT.encode(@payload, encode_key, algorithm, header_fields)
-        remember_jti(user_id)
-      end
-    end
-
-    # 暗号化されたuserIDからユーザーを取得する
-    def entity_for_user(id = nil)
-      id ||= @encode_user_id
-      User.find(decrypt_for(id))
-    end
-
-    private
-
-      ## エンコードメソッド ------------------------------
-
-      # 有効期限をUnixtimeで返す
-      def token_expiration
-        UserAuth.refresh_token_lifetime.from_now.to_i
+    class << self
+      def encode(user_id)
+        add_payload = {
+          jti: jwt_id
+        }
+        override_lifetime = 1.day
+        @@token_ins.encode(user_id, add_payload: add_payload, override_lifetime: override_lifetime)
       end
 
-      # jwt_idの生成
-      # Digest::MD5.hexdigest => 複合不可のハッシュを返す
-      # SecureRandom.uuid => 一意性の値を返す
+      def decode(token)
+        decode_ins = @@token_ins.decode(token)
+        verify_jti(decode_ins.user, decode_ins.payload["jti"])
+        return decode_ins
+      end
+
+      private
+
       def jwt_id
         Digest::MD5.hexdigest(SecureRandom.uuid)
       end
 
-      # エンコード時のデフォルトペイロード
-      def default_payload
-        {
-          user_claim => @encode_user_id,
-          exp: token_expiration,
-          iss: token_issuer,
-          aud: token_audience,
-          jti: jwt_id
-        }
+      def verify_jti(user, payload_jti)
+        expected_jti = user.refresh_jti
+        if payload_jti != expected_jti
+          raise(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{payload_jti || '<none>'} not included session.")
+        end
       end
+    end
 
-      # @payloadのjtiを返す
-      def payload_jti
-        @payload.with_indifferent_access[:jti]
+    def initialize(cookies, response_4XX)
+      @cookies = cookies
+      @token = cookies[:refresh_token]
+      @response_4XX = response_4XX
+    end
+
+    def decode_token_validate
+      @@token_ins.token_not_set_response(@response_4XX) and return if @token.nil?
+      begin
+        token_user
+      rescue JWT::ExpiredSignature
+        delete_cookie_token
+        @@token_ins.token_expired_response(@response_4XX)
+      rescue JWT::DecodeError, UserAuth::DecodeError => e
+        delete_cookie_token
+        @@token_ins.token_invalid_response(@response_4XX, e)
       end
+    end
 
-      # jtiをUsersテーブルに保存する
-      def remember_jti(user_id)
-        User.find(user_id).remember(payload_jti)
-      end
+    def token_user
+      @_token_user ||= self.class.decode(@token).user
+    end
 
-      ## デコードメソッド --------------------------------
+    private
 
-      # デコード時のjwt_idを検証する(エラーはJWT::DecodeErrorに委託する)
-      def verify_jti?(jti, payload)
-        encode_user_id = get_user_id_from(payload)
-        user = entity_for_user(encode_user_id) # not_found_exception
-        user.refresh_jti == jti
-        # user.refresh_jti[encode_user_id] && user.refresh_jti[encode_user_id]['jti'] == jit
-      rescue UserAuth.not_found_exception_class
-        false
-      end
-
-      # ペイロードの検証
-      # ruby-jwtのデフォルト検証: https://www.rubydoc.info/github/jwt/ruby-jwt/master/JWT/DefaultOptions
-      def verify_payload
-        {
-          verify_expiration: true,           # 有効期限の検証(必須)
-          algorithm: algorithm,              # decode時のアルゴリズムの検証（必須）
-          verify_jti: proc { |jti, payload|  # トークンのjtiとテーブルのjtiの検証
-            verify_jti?(jti, payload)
-          }
-        }
-      end
+    def delete_cookie_token
+      @cookies.delete(:refresh_token)
+    end
   end
+  class InvalidJtiError < UserAuth::DecodeError; end
 end
