@@ -1,6 +1,4 @@
 class User < ApplicationRecord
-  # Token生成モジュール
-  include UserAuth::TokenGenerate
 
   # バリデーション前処理
   before_validation :downcase_email
@@ -42,7 +40,6 @@ class User < ApplicationRecord
   
   # methods -------------------------------------------------------------------
   class << self
-    # emailからアクティブなユーザーを返す(= ログインユーザー)
     def find_by_activated(email)
       find_by(email: email, activated: true)
     end
@@ -50,37 +47,35 @@ class User < ApplicationRecord
 
   # 自分以外の同じemailのアクティブなユーザーがいる場合にtrueを返す
   def email_activated?
-    User.where(email: email, activated: true).where.not(id: id).take.present?
-  end
-  
-  # フレッシュトークンのJWT IDを登録する
-  def remember(jti)
-    # 【TODO】書き換えでなく、別端末からのログインも許容できるよう、ログイン単位のjtiを記憶できるようにする。
-    update!(refresh_jti: jti)
+    User.where(email: email, activated: true).where.not(id: self.id).take.present?
   end
 
-  # フレッシュトークンのJWT IDを削除する
+  def remember_jti!(refresh_jti)
+    self.update!(refresh_jti: refresh_jti)
+  end
+
   def forget
-    update!(refresh_jti: nil)
+    self.update_attribute(:refresh_jti, nil)
   end
 
   # 共通のJSONレスポンス
   def response_json(payload = {})
-    as_json(only: [:name, :email]).merge(payload).with_indifferent_access
+    self.as_json(only: [:name, :email]).merge(payload).with_indifferent_access
   end
 
   # アカウントアクティベイト用トークン生成＆メール送付
   def send_activation_email
-    lifetime = 1.hours
-    activate_token = self.encode_access_token({lifetime: lifetime, obj: :account_activation}).token
-    UserMailer.account_activation(self, lifetime, activate_token).deliver_now
+    UserMailer.account_activation(self).deliver_now
+  end
+
+  def activate
+    self.update(activated: true) 
   end
 
   private
 
-    # email小文字化
-    def downcase_email
-      self.email.downcase! if email
-    end
+  def downcase_email
+    self.email.downcase! if self.email
+  end
 
 end
