@@ -1,15 +1,23 @@
 class ApplicationController < ActionController::API
   include ActionController::Cookies
-  include UserAuth::UserAuthenticate
 
   private
 
-    def response_401(msg = "認証情報が不正です。")
-      render status: 401, json: { success: false, error: msg }
-    end
+  def access_token_validate
+    access_token = request.headers["Authorization"]&.split&.last
+    @access_token_ins = UserAuth::AccessToken.new(access_token, method(:response_4XX))
+    @access_token_ins.decode_token_validate
+  end
 
-    def response_500(msg = "サーバー内でエラーが発生しました。")
-      render status: 500, json: { success: false, error: msg }
-    end
+  def authorize_user
+    @access_token_ins.token_user
+  end
 
+  def response_4XX(status, code: nil, message: nil )
+    render(status: status, json: { success: false, code: code, message: message })
+  end
+
+  def response_500(code: :internal_server_error, message: "サーバー内部エラー" )
+    render(status: 500, json: { success: false, code: code, message: message })
+  end
 end
