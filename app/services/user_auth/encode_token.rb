@@ -4,20 +4,15 @@ module UserAuth
   class EncodeToken
     include TokenEncryptCommon
 
-    attr_reader :user_id, :lifetime, :payload, :header, :token
+    attr_reader :user_id, :generate_time, :lifetime, :payload, :header, :token
 
     def initialize(user_id, add_payload, override_lifetime: nil)
       @user_id = user_id
+      @generate_time = DateTime.now
       @lifetime = override_lifetime || default_lifetime
       @payload = default_payload.merge(add_payload)
       @header = header_field
       @token = JWT.encode(@payload, secret_key, algorithm, @header)
-    end
-
-    # lifetimeの日本語テキストを返す
-    def lifetime_text
-      time, period = @lifetime.inspect.sub(/s\z/, "").split
-      time + I18n.t("datetime.periods.#{period}", default: "")
     end
 
     private
@@ -33,7 +28,7 @@ module UserAuth
 
     # 有効期限をUnixtimeで返す
     def token_expiration
-      @lifetime.from_now.to_i
+      @lifetime.after(@generate_time).to_i
     end
 
     def default_payload
