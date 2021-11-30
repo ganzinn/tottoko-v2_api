@@ -8,12 +8,12 @@ module UserAuth
       payload = {
         typ: @token_type
       }.merge(add_payload)
-      return UserAuth::EncodeToken.new(user_id, payload, override_lifetime: override_lifetime)
+      return UserAuth::EncodeToken.new(user_id, payload, override_lifetime)
     end
 
-    def decode(token)
+    def decode(token, add_required_claims: [])
       expected_typ = @token_type
-      return UserAuth::DecodeToken.new(token, expected_typ)
+      return UserAuth::DecodeToken.new(token, expected_typ, add_required_claims)
     end
 
     def token_not_set_response(response_4XX)

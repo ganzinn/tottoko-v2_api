@@ -55,7 +55,11 @@ class User < ApplicationRecord
   end
 
   def forget
-    self.update_attribute(:refresh_jti, nil)
+    self.update(refresh_jti: nil)
+  end
+
+  def activate
+    self.update(activated: true) 
   end
 
   # 共通のJSONレスポンス
@@ -63,7 +67,6 @@ class User < ApplicationRecord
     self.as_json(only: [:name, :email]).merge(payload).with_indifferent_access
   end
 
-  # アカウントアクティベイト用トークン生成＆メール送付
   def send_activation_email
     UserMailer.account_activation(self).deliver_now
   end
@@ -72,8 +75,8 @@ class User < ApplicationRecord
     UserMailer.password_reset(self).deliver_now
   end
 
-  def activate
-    self.update(activated: true) 
+  def send_email_change_email
+    UserMailer.email_change(self).deliver_now
   end
 
   private

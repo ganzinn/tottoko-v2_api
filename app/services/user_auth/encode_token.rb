@@ -6,7 +6,7 @@ module UserAuth
 
     attr_reader :user_id, :generate_time, :lifetime, :payload, :header, :token
 
-    def initialize(user_id, add_payload, override_lifetime: nil)
+    def initialize(user_id, add_payload, override_lifetime)
       @user_id = user_id
       @generate_time = DateTime.now
       @lifetime = override_lifetime || default_lifetime

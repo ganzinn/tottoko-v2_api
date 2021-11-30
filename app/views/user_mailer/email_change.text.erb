@@ -1,0 +1,12 @@
+<%= @user.name %> さん
+
+<%= @generate_time_text %>
+メールアドレス変更の申込みを受け付けました。
+下記WEB画面にアクセスし、お手続きの確定をお願い致します。
+
+※下記WEB画面にアクセスするまでは、メールアドレスの変更は行われません。
+
+■メールアドレス変更画面
+<%= ENV["FRONT_URL"] + ENV["FRONT_EMAIL_CHANGE_PATH"] + "?token=" + @encode_token_ins.token %>
+
+※このURLは、変更のお申込みから<%= @lifetime_text %>のみ有効です。

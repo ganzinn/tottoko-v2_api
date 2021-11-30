@@ -6,8 +6,9 @@ module UserAuth
 
     attr_reader :token, :header, :payload, :user
 
-    def initialize(token, expected_typ)
+    def initialize(token, expected_typ, add_required_claims)
       @token = token
+      @required_claims = ["exp", "sub", "typ"].concat(add_required_claims)
       @payload, @header = JWT.decode(@token.to_s, secret_key, true, verify_claim)
       verify_typ(expected_typ)
       @user = user_from_payload_sub
@@ -33,9 +34,11 @@ module UserAuth
     # ruby-jwtで行うクレーム検証
     def verify_claim
       {
-        required_claims: ["exp", "sub", "typ"],
-        verify_expiration: true,
-        algorithm: algorithm
+        # JWTの仕様ではheaderのalgorithmで署名検証するが、想定外のalgorithmで署名検証した場合セキュリティリスクがあるため、
+        # 事前に想定通りのalgorithmか検証（ruby-jwtデフォルト）
+        algorithm: algorithm,
+        required_claims: @required_claims,
+        verify_expiration: true
       }
     end
 

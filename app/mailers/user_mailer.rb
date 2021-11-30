@@ -21,6 +21,14 @@ class UserMailer < ApplicationMailer
     mail to: @user.email, subject:"【tottoko】パスワード再設定のご案内"
   end
 
+  def email_change(user)
+    @user = user
+    @encode_token_ins = UserAuth::EmailChangeToken.encode(@user.id, @user.email)
+    @generate_time_text = I18n.l(@encode_token_ins.generate_time)
+    @lifetime_text = period_format(@encode_token_ins.lifetime)
+    mail to: @user.email, subject:"【tottoko】メールアドレス変更のご案内"
+  end
+
   private
 
   # lifetimeの日本語テキストを返す
