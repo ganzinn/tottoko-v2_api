@@ -2,19 +2,23 @@ module UserAuth
   class RefreshToken
 
     @@token_ins = UserAuth::TokenBase.new(:refresh)
+    @@add_claim_for_jti = "jti"
 
     class << self
       def encode(user_id)
         add_payload = {
-          jti: jwt_id
+          @@add_claim_for_jti.to_sym => jwt_id
         }
         override_lifetime = 1.day
         @@token_ins.encode(user_id, add_payload: add_payload, override_lifetime: override_lifetime)
       end
 
       def decode(token)
-        decode_ins = @@token_ins.decode(token)
-        verify_jti(decode_ins.user, decode_ins.payload["jti"])
+        add_required_claims = [
+          @@add_claim_for_jti
+        ]
+        decode_ins = @@token_ins.decode(token, add_required_claims: add_required_claims)
+        verify_jti(decode_ins.user, decode_ins.payload[@@add_claim_for_jti])
         return decode_ins
       end
 
@@ -27,7 +31,7 @@ module UserAuth
       def verify_jti(user, payload_jti)
         expected_jti = user.refresh_jti
         if payload_jti != expected_jti
-          raise(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{payload_jti || '<none>'} not included session.")
+          raise(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{payload_jti || '<none>'} not included session")
         end
       end
     end
