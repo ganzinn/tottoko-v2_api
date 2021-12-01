@@ -13,11 +13,11 @@ class ApplicationController < ActionController::API
     @access_token_ins.token_user
   end
 
-  def response_4XX(status, code: nil, message: nil )
-    render(status: status, json: { success: false, code: code, message: message })
+  def response_4XX(status, code: nil, messages: nil )
+    render(status: status, json: { success: false, code: code, messages: messages })
   end
 
-  def response_500(code: :internal_server_error, message: "サーバー内部エラー" )
-    render(status: 500, json: { success: false, code: code, message: message })
+  def response_500(code: :internal_server_error, messages: "サーバー内部エラー" )
+    render(status: 500, json: { success: false, code: code, messages: messages })
   end
 end

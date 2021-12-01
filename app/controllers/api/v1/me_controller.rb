@@ -16,8 +16,7 @@ class Api::V1::MeController < ApplicationController
       set_refresh_token
       render json: login_response_hash
     else
-      message = Utils::extract_when_one(@user.errors.full_messages)
-      response_4XX(422, code: "unprocessable", message: message)
+      response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
     end
   end
 
@@ -26,8 +25,7 @@ class Api::V1::MeController < ApplicationController
     if user.update(password_reset_params)
       render status: 200, json: {success: true }
     else
-      message = Utils::extract_when_one(user.errors.full_messages)
-      response_4XX(422, code: "unprocessable", message: message)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 
@@ -38,8 +36,7 @@ class Api::V1::MeController < ApplicationController
       user.send_email_change_email
       render status: 200, json: {success: true }
     else
-      message = Utils::extract_when_one(user.errors.full_messages)
-      response_4XX(422, code: "unprocessable", message: message)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 
@@ -48,8 +45,7 @@ class Api::V1::MeController < ApplicationController
     if user.update(email: change_email)
       render status: 200, json: {success: true }
     else
-      message = Utils::extract_when_one(user.errors.full_messages)
-      response_4XX(422, code: "unprocessable", message: message)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 

@@ -21,8 +21,8 @@ class Api::V1::SessionsController < ApplicationController
       render status: 200, json: {success: true }
     else
       code = :session_delete_fail
-      message = "セッション削除に失敗しました"
-      response_500(code: code, message: message )
+      messages = ["セッション削除に失敗しました"]
+      response_500(code: code, messages: messages )
     end
   end
 
@@ -31,8 +31,8 @@ class Api::V1::SessionsController < ApplicationController
   def user_authenticate
     unless login_user.present? && login_user.authenticate(login_params[:password])
       code = :authenticate_fail
-      message = "認証に失敗しました"
-      response_4XX(401, code: code, message: message )
+      messages = ["認証に失敗しました"]
+      response_4XX(401, code: code, messages: messages )
     end
   end
 

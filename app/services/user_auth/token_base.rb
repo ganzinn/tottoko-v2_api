@@ -18,14 +18,14 @@ module UserAuth
 
     def token_not_set_response(response_4XX)
       code = @token_type + "_token_not_set"
-      message = @token_type.camelize + "Token が設定されていません"
-      response_4XX.call(401, code: code, message: message)
+      messages = @token_type.camelize + "Token が設定されていません"
+      response_4XX.call(401, code: code, messages: messages)
     end
 
     def token_expired_response(response_4XX)
       code = @token_type + "_token_expired"
-      message = @token_type.camelize + "Token の有効期限切れです"
-      response_4XX.call(401, code: code, message: message)
+      messages = @token_type.camelize + "Token の有効期限切れです"
+      response_4XX.call(401, code: code, messages: messages)
     end
 
     def token_invalid_response(response_4XX, exception = nil)
@@ -34,8 +34,8 @@ module UserAuth
         # 【TODO】ログ出力処理
       end
       code = @token_type + "_token_invalid"
-      message = @token_type.camelize + "Token が有効ではありません"
-      response_4XX.call(401, code: code, message: message)
+      messages = @token_type.camelize + "Token が有効ではありません"
+      response_4XX.call(401, code: code, messages: messages)
     end
   end
 end

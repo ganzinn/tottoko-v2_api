@@ -6,8 +6,7 @@ class Api::V1::UsersController < ApplicationController
       user.send_activation_email
       render status: 200, json: {success: true }
     else
-      message = Utils::extract_when_one(user.errors.full_messages)
-      response_4XX(422, code: "unprocessable", message: message)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 
