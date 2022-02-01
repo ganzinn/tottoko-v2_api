@@ -10,4 +10,12 @@
   end
 end
 
+# 非アクティベイトユーザー
+not_activated_user = User.new(
+  name: 'not_activated_user',
+  email: 'not_activated_user@example.com',
+  password: 'password'
+)
+not_activated_user.save!
+
 puts "users = #{User.count}"
