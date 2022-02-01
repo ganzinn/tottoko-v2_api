@@ -38,8 +38,6 @@ class Api::V1::SessionsController < ApplicationController
 
   def login_user
     @_login_user ||= User.find_by_activated(login_params[:email])
-    rescue ActiveRecord::RecordNotFound
-      nil
   end
 
   def login_params

@@ -11,14 +11,9 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def password_reset_entry
-    begin
-      user = User.find_by_activated(password_reset_entry_params[:email])
-      user.send_password_reset_email
-    rescue ActiveRecord::RecordNotFound
-      nil
-    ensure
-      render status: 200, json: {success: true }
-    end
+    user = User.find_by_activated(password_reset_entry_params[:email])
+    user.present? && user.send_password_reset_email
+    render status: 200, json: {success: true }
   end
 
   private
