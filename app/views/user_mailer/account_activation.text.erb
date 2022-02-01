@@ -1,0 +1,10 @@
+<%= @user.name %> さん
+
+ようこそ tottoko アプリケーションへ！
+
+<%= @lifetime_text %>以内に下記リンクをクリックしてして、登録したアカウントを有効化してください。
+
+<%= ENV["FRONT_URL"] + ENV["FRONT_ACTIVATE_PATH"] + "?token=" + @encode_token_ins.token %>
+
+<%# 以下はapi側のactivate用url(デバッグ用) %>
+<%# <%= api_v1_auth_activate_url(activate_token: @encode_token_ins.token) %>

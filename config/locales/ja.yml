@@ -116,6 +116,14 @@ ja:
       day: 日
       month: 月
       year: 年
+    periods:
+      second: 秒間
+      minute: 分間
+      hour: 時間
+      day: 日間
+      week: 週間
+      month: ヶ月間
+      year: 年間
   errors:
     format: "%{attribute}%{message}"
     messages:
@@ -214,7 +222,8 @@ ja:
   time:
     am: 午前
     formats:
-      default: "%Y年%m月%d日(%a) %H時%M分%S秒 %z"
+      # default: "%Y年%m月%d日(%a) %H時%M分%S秒 %z"
+      default: "%Y年%m月%d日 %H時%M分"
       long: "%Y/%m/%d %H:%M"
       short: "%m/%d %H:%M"
     pm: 午後

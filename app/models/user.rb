@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+
   # バリデーション前処理
   before_validation :downcase_email
 
@@ -38,16 +39,50 @@ class User < ApplicationRecord
                                   # ※ APIとしてはpassword_confirmationはnil許容でも問題ないという考え。
   
   # methods -------------------------------------------------------------------
+  class << self
+    def find_by_activated(email)
+      find_by(email: email, activated: true)
+    end
+  end
+
   # 自分以外の同じemailのアクティブなユーザーがいる場合にtrueを返す
   def email_activated?
-    User.where(email: email, activated: true).where.not(id: id).take.present?
+    User.where(email: email, activated: true).where.not(id: self.id).take.present?
   end
-  
+
+  def remember_jti!(refresh_jti)
+    self.update!(refresh_jti: refresh_jti)
+  end
+
+  def forget
+    self.update(refresh_jti: nil)
+  end
+
+  def activate
+    self.update(activated: true) 
+  end
+
+  # 共通のJSONレスポンス
+  def response_json(payload = {})
+    self.as_json(only: [:name, :email]).merge(payload).with_indifferent_access
+  end
+
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
+  def send_password_reset_email
+    UserMailer.password_reset(self).deliver_now
+  end
+
+  def send_email_change_email
+    UserMailer.email_change(self).deliver_now
+  end
+
   private
 
-    # email小文字化
-    def downcase_email
-      self.email.downcase! if email
-    end
+  def downcase_email
+    self.email.downcase! if self.email
+  end
 
 end
