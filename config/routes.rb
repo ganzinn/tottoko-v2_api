@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   namespace :api do
+    resources :health_check, only: :index
+
     namespace :v1 do
 
       resource :users, only: [:create] do
