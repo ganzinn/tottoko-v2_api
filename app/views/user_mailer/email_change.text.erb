@@ -7,6 +7,6 @@
 ※下記WEB画面にアクセスするまでは、メールアドレスの変更は行われません。
 
 ■メールアドレス変更画面
-<%= ENV["FRONT_URL"] + ENV["FRONT_EMAIL_CHANGE_PATH"] + "?token=" + @encode_token_ins.token %>
+<%= ENV["FRONT_URL"] + "/users/me/email_change?token=" + @encode_token_ins.token %>
 
 ※このURLは、変更のお申込みから<%= @lifetime_text %>のみ有効です。
