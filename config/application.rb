@@ -54,8 +54,8 @@ module App
     config.middleware.use ActionDispatch::Cookies
 
     # Cookiesのsame-site属性(Cookieの送信を制御する属性)の設定（Rails6.1〜）
-    # Heroku等のeffective TLDなドメインへのデプロイ時は「None」に設定する必要あり。
-    config.action_dispatch.cookies_same_siteprotection = ENV["COOKIES_SAME_SITE"].to_sym
+    # Heroku等のeffective TLDなドメインへのデプロイ時は「none」(小文字での指定)に設定する必要あり。
+    config.action_dispatch.cookies_same_site_protection = ENV["COOKIES_SAME_SITE"].to_sym
 
     # テストフレームワークをRSpecに変更し、自動生成されるファイルを制御
     config.generators do |g|

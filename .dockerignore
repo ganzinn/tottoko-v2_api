@@ -26,3 +26,4 @@ README.md
 .ash_history
 .local/share/pry/pry_history
 .lesshst
+.viminfo

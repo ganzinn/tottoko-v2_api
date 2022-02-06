@@ -5,7 +5,9 @@ FROM ruby:2.7.4-alpine3.14
 # Rails ENV["TZ"] => Asia/Tokyo
 ENV HOME=/app \ 
     LANG=C.UTF-8 \
-    TZ=Asia/Tokyo
+    TZ=Asia/Tokyo \
+    # credentials編集時に使用
+    EDITOR=vim
 
 # Dockerfile内で指定した命令を実行する ...RUN, COPY, ADD, ENTORYPOINT, CMD
 # 作業ディレクトリを定義
@@ -30,6 +32,8 @@ RUN apk add --no-cache \
             mysql-dev\
             # pryで使用
             less \
+            # credentials編集時に使用
+            vim \
             # 画像サイズ変更で使用
             imagemagick \
             && \

@@ -15,7 +15,7 @@ RSpec.describe UserMailer, type: :mailer do
       aggregate_failures do
         expect(@mail.subject).to eq '【tottoko】アカウント有効化のご案内'
         expect(@mail.to).to eq [@user.email]
-        expect(@mail.from).to eq ['noreply@example.com']
+        expect(@mail.from).to eq ['noreply@su-dx.com']
       end
     end
   end
@@ -34,7 +34,7 @@ RSpec.describe UserMailer, type: :mailer do
       aggregate_failures do
         expect(@mail.subject).to eq '【tottoko】パスワード再設定のご案内'
         expect(@mail.to).to eq [@user.email]
-        expect(@mail.from).to eq ['noreply@example.com']
+        expect(@mail.from).to eq ['noreply@su-dx.com']
       end
     end
   end
@@ -54,7 +54,7 @@ RSpec.describe UserMailer, type: :mailer do
       aggregate_failures do
         expect(@mail.subject).to eq '【tottoko】メールアドレス変更のご案内'
         expect(@mail.to).to eq [@user.email]
-        expect(@mail.from).to eq ['noreply@example.com']
+        expect(@mail.from).to eq ['noreply@su-dx.com']
       end
     end
   end
