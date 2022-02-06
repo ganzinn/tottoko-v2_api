@@ -23,6 +23,7 @@ class Api::V1::MeController < ApplicationController
   def password_reset
     user = password_reset_target
     if user.update(password_reset_params)
+      user.forget
       render status: 200, json: {success: true }
     else
       response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
@@ -41,11 +42,19 @@ class Api::V1::MeController < ApplicationController
   end
 
   def email_change
-    user = email_change_target
-    if user.update(email: change_email)
-      render status: 200, json: {success: true }
+    @user = email_change_target
+    if @user.authenticate(email_change_params[:password])
+      if @user.update(email: change_email)
+        @user.forget
+        set_refresh_token
+        render json: login_response_hash
+      else
+        response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
+      end
     else
-      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
+      code = "password_error"
+      messages = ["パスワードが相違しています"]
+      response_4XX(401, code: code, messages: messages )
     end
   end
 
@@ -97,6 +106,13 @@ class Api::V1::MeController < ApplicationController
 
   def email_change_target
     @email_change_token_ins.token_user
+  end
+
+  def email_change_params
+    params.require(:user)
+    .permit(
+      :password
+    )
   end
 
   def change_email

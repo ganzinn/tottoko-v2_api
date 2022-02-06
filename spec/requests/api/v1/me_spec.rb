@@ -275,19 +275,82 @@ RSpec.describe "Api::V1::Me", type: :request do
       @changed_email = "changed_email@abc.com"
       @email_change_token = UserAuth::EmailChangeToken.encode(@user.id, @changed_email).token
     end
-    context 'トークンが妥当な場合' do
+    context 'Eメール変更トークンとパラメーター（パスワード）が妥当な場合' do
       it '正常レスポンスが返答されること かつ、変更対象メルアドが反映されていること' do
         headers = {
           'Authorization': "Bearer #{@email_change_token}",
+          'Content-Type': 'application/json'
         }
-        put '/api/v1/users/me/email', headers: headers
+        json_params = ({
+          "user": {
+            "password": 'password'
+          }
+        }).to_json
+        put '/api/v1/users/me/email', headers: headers, params: json_params
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # レスポンスチェック
           expect(response.status).to eq 200
           expect(body_hash["success"]).to eq true
+          expect(body_hash).to include("token")
+          expect(body_hash).to include("expires")
+          expect(body_hash).to include("user")
+          # リフレッシュトークン存在チェック
+          expect(cookies).to include("refresh_token")
           # 変更対象メルアドが反映されていること
           expect(User.find(@user.id).email).to eq @changed_email
+        end
+      end
+    end
+    context 'パラメーターが不正な場合' do
+      it '【パスワード相違】エラーレスポンスが返答されること かつ、変更対象メルアドが反映されていないこと' do
+        headers = {
+          'Authorization': "Bearer #{@email_change_token}",
+          'Content-Type': 'application/json'
+        }
+        json_params = ({
+          "user": {
+            "password": 'wrong_password' # 不正パスワード
+          }
+        }).to_json
+        put '/api/v1/users/me/email', headers: headers, params: json_params
+        body_hash = JSON.parse(response.body)
+        aggregate_failures do
+          # レスポンスチェック
+          expect(response.status).to eq 401
+          expect(body_hash["success"]).to eq false
+          expect(body_hash["code"]).to eq "password_error"
+          expect(body_hash["messages"]).to include("パスワードが相違しています")
+          # 変更対象メルアドが反映されていないこと
+          expect(User.find(@user.id).email).to eq @user.email
+        end
+      end
+      it '【変更メルアド不正（既に存在）】エラーレスポンスが返答されること かつ、変更対象メルアドが反映されていないこと' do
+        # 変更予定のメルアドで別ユーザーが新規登録
+        other_user = FactoryBot.build(:user)
+        other_user.email = @changed_email
+        other_user.activated = true
+        other_user.save
+
+        headers = {
+          'Authorization': "Bearer #{@email_change_token}",
+          'Content-Type': 'application/json'
+        }
+        json_params = ({
+          "user": {
+            "password": 'password'
+          }
+        }).to_json
+        put '/api/v1/users/me/email', headers: headers, params: json_params
+        body_hash = JSON.parse(response.body)
+        aggregate_failures do
+          # レスポンスチェック
+          expect(response.status).to eq 422
+          expect(body_hash["success"]).to eq false
+          expect(body_hash["code"]).to eq "unprocessable"
+          expect(body_hash["messages"]).to include("メールアドレスはすでに存在します")
+          # 変更対象メルアドが反映されていないこと
+          expect(User.find(@user.id).email).to eq @user.email
         end
       end
     end
@@ -295,9 +358,15 @@ RSpec.describe "Api::V1::Me", type: :request do
       it '【トークン期限切れ[30分後]】エラーレスポンスが返答されること かつ、変更対象メルアドが反映されていないこと' do
         headers = {
           'Authorization': "Bearer #{@email_change_token}",
+          'Content-Type': 'application/json'
         }
+        json_params = ({
+          "user": {
+            "password": 'password'
+          }
+        }).to_json
         travel_to (30.minute.from_now) do
-          put '/api/v1/users/me/email', headers: headers
+          put '/api/v1/users/me/email', headers: headers, params: json_params
           body_hash = JSON.parse(response.body)
           aggregate_failures do
             expect(response.status).to eq 401
@@ -305,7 +374,7 @@ RSpec.describe "Api::V1::Me", type: :request do
             expect(body_hash["code"]).to eq "email_change_token_expired"
             expect(body_hash["messages"]).to include("EmailChangeToken の有効期限切れです")
             # 変更対象メルアドが反映されていないこと
-            expect(User.find(@user.id).email).not_to eq @changed_email
+            expect(User.find(@user.id).email).to eq @user.email
           end
         end
       end
