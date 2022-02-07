@@ -10,7 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_28_093003) do
+ActiveRecord::Schema.define(version: 2022_02_07_023624) do
+
+  create_table "creators", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "date_of_birth", null: false
+    t.integer "gender_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "families", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "creator_id", null: false
+    t.integer "relation_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["creator_id"], name: "index_families_on_creator_id"
+    t.index ["user_id"], name: "index_families_on_user_id"
+  end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -23,4 +41,6 @@ ActiveRecord::Schema.define(version: 2021_10_28_093003) do
     t.string "refresh_jti"
   end
 
+  add_foreign_key "families", "creators"
+  add_foreign_key "families", "users"
 end
