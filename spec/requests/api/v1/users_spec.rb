@@ -7,7 +7,7 @@ RSpec.describe "Api::V1::Users", type: :request do
   #################################################
   describe "新規ユーザ登録 'POST /api/v1/users'" do
     context 'パラメータが妥当な場合' do
-      it 'レスポンスが正常（status:200, success: true）であること' do
+      it 'レスポンスが正常（status:201, success: true）であること' do
         headers = {
           'Content-Type': 'application/json'
         }
@@ -22,7 +22,7 @@ RSpec.describe "Api::V1::Users", type: :request do
         post '/api/v1/users', headers: headers, params: json_params
         body_hash = JSON.parse(response.body)
         aggregate_failures do
-          expect(response.status).to eq 200
+          expect(response.status).to eq 201
           expect(body_hash["success"]).to eq true
         end
       end
@@ -61,8 +61,10 @@ RSpec.describe "Api::V1::Users", type: :request do
           expect(response.status).to eq 422
           expect(body_hash["success"]).to eq false
           expect(body_hash["messages"].size).to be >= 1
-          body_hash["messages"].each{ |message|
-            expect(message).to be_kind_of(String)
+          body_hash["messages"].each{ |attr, messages|
+            messages.each{ |message|
+              expect(message).to be_kind_of(String)
+            }
           }
         end
       end

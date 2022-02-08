@@ -4,9 +4,9 @@ class Api::V1::UsersController < ApplicationController
     user = User.new(user_create_params)
     if user.save
       user.send_activation_email
-      render status: 200, json: {success: true }
+      render status: 201, json: {success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
+      response_4XX(422, code: "unprocessable", messages: user.errors)
     end
   end
 
