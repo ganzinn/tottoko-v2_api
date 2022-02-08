@@ -44,7 +44,7 @@ RSpec.describe "Api::V1::Me", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "activate_token_expired"
-            expect(body_hash["messages"]).to include("ActivateToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["ActivateToken の有効期限切れです"])
             # 登録ユーザがアクティブ化していないかチェック
             expect( User.find(@user.id).activated ).to eq false
           end
@@ -103,7 +103,7 @@ RSpec.describe "Api::V1::Me", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "access_token_expired"
-            expect(body_hash["messages"]).to include("AccessToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["AccessToken の有効期限切れです"])
             # ユーザー詳細情報 存在チェック(含まれていないこと)
             expect(body_hash).not_to include("user")
           end
@@ -161,8 +161,10 @@ RSpec.describe "Api::V1::Me", type: :request do
           # レスポンスチェック
           expect(response.status).to eq 422
           expect(body_hash["success"]).to eq false
-          body_hash["messages"].each{ |message|
-            expect(message).to be_kind_of(String)
+          body_hash["messages"].each{ |attr, messages|
+            messages.each{ |message|
+              expect(message).to be_kind_of(String)
+            }
           }
         end
       end
@@ -184,7 +186,7 @@ RSpec.describe "Api::V1::Me", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "password_reset_token_expired"
-            expect(body_hash["messages"]).to include("PasswordResetToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["PasswordResetToken の有効期限切れです"])
           end
         end
       end
@@ -255,8 +257,10 @@ RSpec.describe "Api::V1::Me", type: :request do
           # レスポンスチェック
           expect(response.status).to eq 422
           expect(body_hash["success"]).to eq false
-          body_hash["messages"].each{ |message|
-            expect(message).to be_kind_of(String)
+          body_hash["messages"].each{ |attr, messages|
+            messages.each{ |message|
+              expect(message).to be_kind_of(String)
+            }
           }
         end
       end
@@ -348,7 +352,7 @@ RSpec.describe "Api::V1::Me", type: :request do
           expect(response.status).to eq 422
           expect(body_hash["success"]).to eq false
           expect(body_hash["code"]).to eq "unprocessable"
-          expect(body_hash["messages"]).to include("メールアドレスはすでに存在します")
+          expect(body_hash["messages"]["email"]).to match(["すでに存在します"])
           # 変更対象メルアドが反映されていないこと
           expect(User.find(@user.id).email).to eq @user.email
         end
@@ -372,7 +376,7 @@ RSpec.describe "Api::V1::Me", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "email_change_token_expired"
-            expect(body_hash["messages"]).to include("EmailChangeToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["EmailChangeToken の有効期限切れです"])
             # 変更対象メルアドが反映されていないこと
             expect(User.find(@user.id).email).to eq @user.email
           end

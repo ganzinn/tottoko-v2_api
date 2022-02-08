@@ -54,7 +54,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           expect(response.status).to eq 401
           expect(body_hash["success"]).to eq false
           expect(body_hash["code"]).to eq "authenticate_fail"
-          expect(body_hash["messages"]).to include("認証に失敗しました")
+          expect(body_hash["messages"]["base"]).to match(["認証に失敗しました"])
           # リフレッシュトークンが付与されていないかチェック
           expect(cookies).to_not include("refresh_token")
         end
@@ -76,7 +76,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           expect(response.status).to eq 401
           expect(body_hash["success"]).to eq false
           expect(body_hash["code"]).to eq "authenticate_fail"
-          expect(body_hash["messages"]).to include("認証に失敗しました")
+          expect(body_hash["messages"]["base"]).to match(["認証に失敗しました"])
           # リフレッシュトークンが付与されていないかチェック
           expect(cookies).to_not include("refresh_token")
         end
@@ -143,7 +143,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "refresh_token_expired"
-            expect(body_hash["messages"]).to include("RefreshToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["RefreshToken の有効期限切れです"])
             # リフレッシュトークンが空となっているかチェック
             expect(cookies["refresh_token"]).to be_empty
             # refresh_jtiの更新チェック
@@ -210,7 +210,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "refresh_token_expired"
-            expect(body_hash["messages"]).to include("RefreshToken の有効期限切れです")
+            expect(body_hash["messages"]["base"]).to match(["RefreshToken の有効期限切れです"])
             # リフレッシュトークンが空となっているかチェック
             expect(cookies["refresh_token"]).to be_empty
             # refresh_jtiが削除されていないかチェック（前回と同じrefresh_jti）

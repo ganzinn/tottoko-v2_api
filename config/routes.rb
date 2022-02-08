@@ -3,6 +3,11 @@ Rails.application.routes.draw do
     resources :health_check, only: :index
 
     namespace :v1 do
+      namespace :sessions do
+        post :login
+        post :refresh
+        delete :logout
+      end
 
       resource :users, only: [:create] do
         post :password_reset_entry
@@ -13,14 +18,12 @@ Rails.application.routes.draw do
           post :email_change_entry, to: 'me#email_change_entry'
           put :email, to: 'me#email_change'
 
+          resources :creators, controller: :my_creators, only: [:create, :index]
         end
       end
+
+      resources :creators, only: [:show, :update, :destroy]
       
-      namespace :sessions do
-        post :login
-        post :refresh
-        delete :logout
-      end
     end
   end
 end

@@ -19,14 +19,14 @@ module UserAuth
     def token_not_set_response(response_4XX)
       code = @token_type + "_token_not_set"
       message = @token_type.camelize + "Token が設定されていません"
-      messages = [message]
+      messages = {base: [message]}
       response_4XX.call(401, code: code, messages: messages)
     end
 
     def token_expired_response(response_4XX)
       code = @token_type + "_token_expired"
       message = @token_type.camelize + "Token の有効期限切れです"
-      messages = [message]
+      messages = {base: [message]}
       response_4XX.call(401, code: code, messages: messages)
     end
 
@@ -37,7 +37,7 @@ module UserAuth
       end
       code = @token_type + "_token_invalid"
       message = @token_type.camelize + "Token が有効ではありません"
-      messages = [message]
+      messages = {base: [message]}
       response_4XX.call(401, code: code, messages: messages)
     end
   end
