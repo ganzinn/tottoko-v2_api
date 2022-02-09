@@ -12,7 +12,7 @@ class CreatorFamilyForm
   end
 
   # バリデーション -------------------------------------------------
-  ALLOW_VALUES_RELATION_ID = [1, 2] # 「パパ・ママ」のみ
+  ALLOW_VALUES_RELATION_ID = [1, 2, 3] # 「パパ・ママ・本人」のみ
   validates :relation_id,
     presence: true,
     inclusion: {
