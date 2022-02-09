@@ -19,11 +19,12 @@ Rails.application.routes.draw do
           put :email, to: 'me#email_change'
 
           resources :creators, controller: :my_creators, only: [:create, :index]
+          resources :works, controller: :my_works, only: [:index, :create]
         end
       end
 
       resources :creators, only: [:show, :update, :destroy]
-      
+      resources :works, only: [:show, :update, :destroy]
     end
   end
 end
