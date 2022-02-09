@@ -1,7 +1,7 @@
 class Api::V1::CreatorsController < ApplicationController
   before_action :access_token_validate
   before_action :set_creator
-  before_action :read_permission_check
+  before_action :show_permission_check
   before_action :edit_permission_check, only: [:update, :destroy]
 
   def show
@@ -30,7 +30,7 @@ class Api::V1::CreatorsController < ApplicationController
     @creator = Creator.find(params[:id]) # 存在しない場合、404
   end
 
-  def read_permission_check
+  def show_permission_check
     @family = Family.find_by(user_id: authorize_user.id, creator_id: @creator.id)
     # 家族のみ
     unless @family

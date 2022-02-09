@@ -8,6 +8,6 @@ json.users do
     json.user_id creator_family.user.id
     json.user_name creator_family.user.name
     json.relation creator_family.relation.value
-    json.remove_family_permission @family.remove_family_permission_check(creator_family)
+    json.family_remove_permission @family.family_remove_permission_check(creator_family)
   end
 end
