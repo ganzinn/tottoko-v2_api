@@ -52,5 +52,7 @@ gem 'rack-cors'
 gem 'active_hash'
 # アクセストークンやリフレッシュトークン等に使用
 gem 'jwt', '~> 2.3'
-# メール送信に仕様
+# メール送信に使用
 gem 'aws-sdk-rails'
+# 画像等ファイル保存に使用
+gem 'aws-sdk-s3'
