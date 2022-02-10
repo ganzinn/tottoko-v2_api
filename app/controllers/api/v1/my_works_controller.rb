@@ -31,7 +31,7 @@ class Api::V1::MyWorksController < ApplicationController
         .select('works.id AS id, families.id AS family_id, works.scope_id AS scope_id, families.relation_id AS relation_id')
         .where(creator_id: select_my_creator_ids, families: { user_id: authorize_user.id })
         .find_each do |work|
-          my_work_ids << work.id if work.scope_id == 4 || work.scope.targets.include?(work.relation_id)
+          my_work_ids << work.id if work.scope_id == 4 || work.scope.targets.include?(work.relation_id).with_attached_images.includes(:creator)
         end
     @my_works = Work.where(id: my_work_ids).order(date: :desc, updated_at: :desc)
   end
@@ -51,7 +51,8 @@ class Api::V1::MyWorksController < ApplicationController
       :title,
       :description,
       :scope_id,
-      :creator_id
+      :creator_id,
+      images: []
     )
   end
 end

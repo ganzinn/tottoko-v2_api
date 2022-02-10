@@ -6,3 +6,4 @@ end
 json.creator do
   json.extract! work.creator, :id, :name, :date_of_birth
 end
+json.image_urls work.image_urls
