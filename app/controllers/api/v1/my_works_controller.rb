@@ -1,4 +1,6 @@
 class Api::V1::MyWorksController < ApplicationController
+  include Pagination
+
   before_action :access_token_validate
   before_action :create_permission_check, only: [:create]
 
@@ -12,10 +14,16 @@ class Api::V1::MyWorksController < ApplicationController
   end
 
   def index
+    # ページネーション初期化
+    page = params[:page] || 1
+    per = params[:per] || 16
+
+
+    # 閲覧可能なクリエーターの抽出。
     my_creator_ids = Family.where(user_id: authorize_user.id).pluck(:creator_id)
     select_my_creator_ids = my_creator_ids
 
-    # 出力するクリエーターの選択。クエリパラメータ（配列）で絞り込み
+    # クエリパラメータ（配列）で出力するクリエーターを絞り込み
     if params[:creator_ids].present? && params[:creator_ids].instance_of?(Array)
       params[:creator_ids].map!(&:to_i) # 配列内の文字列を文字列から数値へ変換
       if (params[:creator_ids] - my_creator_ids).empty? # 対象のクリエーターが閲覧可能なクリエーターか確認
@@ -33,7 +41,10 @@ class Api::V1::MyWorksController < ApplicationController
         .find_each do |work|
           my_work_ids << work.id if work.scope_id == 4 || work.scope.targets.include?(work.relation_id)
         end
-    @my_works = Work.where(id: my_work_ids).order(date: :desc, updated_at: :desc).with_attached_images.includes(:creator)
+    @my_works = Work.where(id: my_work_ids).order(date: :desc, updated_at: :desc).with_attached_images.includes(:creator).page(page).per(per)
+
+    # ページネーション情報の取得
+    @pagination = pagination(@my_works)
   end
 
   private

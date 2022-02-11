@@ -56,3 +56,5 @@ gem 'jwt', '~> 2.3'
 gem 'aws-sdk-rails'
 # 画像等ファイル保存に使用
 gem 'aws-sdk-s3'
+# ページネーション（無限スクロール）に使用
+gem 'kaminari'
