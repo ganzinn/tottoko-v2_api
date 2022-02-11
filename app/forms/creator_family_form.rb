@@ -3,7 +3,8 @@ class CreatorFamilyForm
   attr_accessor :name,
                 :date_of_birth,
                 :gender_id,
-                :user_id
+                :user_id,
+                :creator_id
   
   attr_reader   :relation_id
 
@@ -30,9 +31,10 @@ class CreatorFamilyForm
         date_of_birth: date_of_birth,
         gender_id: gender_id
       )
+      self.creator_id = creator.id
       Family.create!(
         user_id: user_id,
-        creator_id: creator.id,
+        creator_id: creator_id,
         relation_id: relation_id
       )
     end

@@ -7,7 +7,7 @@ class Api::V1::MyWorksController < ApplicationController
   def create
     work = Work.new(work_params)
     if work.save
-      render status: 201, json: {success: true }
+      render status: 201, json: {success: true, work: {id: work.id} }
     else
       response_4XX(422, code: "unprocessable", messages: work.errors)
     end

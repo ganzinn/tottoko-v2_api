@@ -10,7 +10,7 @@ class Api::V1::WorksController < ApplicationController
 
   def update
     if @work.update(work_params)
-      render status: 200, json: {success: true }
+      render status: 200, json: {success: true, work: {id: @work.id} }
     else
       response_4XX(422, code: "unprocessable", messages: @work.errors)
     end
