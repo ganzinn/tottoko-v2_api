@@ -67,5 +67,9 @@ module App
     end
 
     config.api_only = true
+
+    # image url 出力用設定
+    Rails.application.routes.default_url_options = { host: ENV['API_URL']}
+
   end
 end

@@ -3,7 +3,8 @@ class CreatorFamilyForm
   attr_accessor :name,
                 :date_of_birth,
                 :gender_id,
-                :user_id
+                :user_id,
+                :creator_id
   
   attr_reader   :relation_id
 
@@ -12,7 +13,7 @@ class CreatorFamilyForm
   end
 
   # バリデーション -------------------------------------------------
-  ALLOW_VALUES_RELATION_ID = [1, 2] # 「パパ・ママ」のみ
+  ALLOW_VALUES_RELATION_ID = [1, 2, 3] # 「パパ・ママ・本人」のみ
   validates :relation_id,
     presence: true,
     inclusion: {
@@ -30,9 +31,10 @@ class CreatorFamilyForm
         date_of_birth: date_of_birth,
         gender_id: gender_id
       )
+      self.creator_id = creator.id
       Family.create!(
         user_id: user_id,
-        creator_id: creator.id,
+        creator_id: creator_id,
         relation_id: relation_id
       )
     end

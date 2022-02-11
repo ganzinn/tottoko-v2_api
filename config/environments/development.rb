@@ -35,9 +35,6 @@ Rails.application.configure do
 
   # host = 'localhost:3001'
   # config.action_mailer.default_url_options = { host: host, protocol: 'http' }
-  
-  host = ENV['API_URL']
-  config.action_mailer.default_url_options = { host: host }
 
   config.action_mailer.perform_caching = false
 

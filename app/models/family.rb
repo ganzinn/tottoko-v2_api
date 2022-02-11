@@ -15,20 +15,27 @@ class Family < ApplicationRecord
     }
   # ----------------------------------------------------------------
 
-  # クリエーター（子ども）情報の編集・削除のチェック
+  # クリエーター情報の編集・削除権限チェック
   def creator_edit_permission_check
-    # パパ・ママのみ
-    [1, 2].include?(self.relation_id)
+    # パパ・ママ・本人のみ
+    [1, 2, 3].include?(self.relation_id)
   end
 
-  # クリエーター（子ども）の家族の解除権限チェック
-  def remove_family_permission_check(cleator_family)
+  # クリエーターの家族解除権限チェック
+  def family_remove_permission_check(cleator_family)
     if self.creator_edit_permission_check
-      # 自身がパパ・ママの場合、自身以外との家族を解除可能
+      # 自身がパパ・ママ・本人の場合、自身以外との関係を解除可能
       self.user_id != cleator_family.user_id
     else
-      # 自身がパパ・ママ以外の場合、自身のみ家族との解除可能
-      user_family.user_id == self.user_id
+      # 自身がパパ・ママ・本人以外の場合、自身のみ関係を解除可能
+      self.user_id == cleator_family.user_id
     end
   end
+
+  # 作品情報の作成・編集・削除権限チェック
+  def work_edit_permission_check
+    # パパ・ママ・本人のみ
+    [1, 2, 3].include?(self.relation_id)
+  end
+  
 end

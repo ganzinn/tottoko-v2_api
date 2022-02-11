@@ -1,7 +1,7 @@
 class Api::V1::CreatorsController < ApplicationController
   before_action :access_token_validate
   before_action :set_creator
-  before_action :read_permission_check
+  before_action :show_permission_check
   before_action :edit_permission_check, only: [:update, :destroy]
 
   def show
@@ -10,7 +10,7 @@ class Api::V1::CreatorsController < ApplicationController
 
   def update
     if @creator.update(creator_params)
-      render status: 200, json: {success: true }
+      render status: 200, json: {success: true, creator: {id: @creator.id }}
     else
       response_4XX(422, code: "unprocessable", messages: @creator.errors)
     end
@@ -30,7 +30,7 @@ class Api::V1::CreatorsController < ApplicationController
     @creator = Creator.find(params[:id]) # 存在しない場合、404
   end
 
-  def read_permission_check
+  def show_permission_check
     @family = Family.find_by(user_id: authorize_user.id, creator_id: @creator.id)
     # 家族のみ
     unless @family

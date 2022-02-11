@@ -10,7 +10,7 @@ class ApplicationController < ActionController::API
   end
 
   def authorize_user
-    @access_token_ins.token_user
+    @access_token_ins.present? && @access_token_ins.token_user
   end
 
   def response_4XX(status, code: nil, messages: nil )

@@ -4,7 +4,7 @@ class Api::V1::MyCreatorsController < ApplicationController
   def create
     creator_family_form = CreatorFamilyForm.new(creator_family_form_params)
     if creator_family_form.save
-      render status: 201, json: {success: true }
+      render status: 201, json: {success: true, creator: {id: creator_family_form.creator_id} }
     else
       response_4XX(422, code: "unprocessable", messages: creator_family_form.errors)
     end
