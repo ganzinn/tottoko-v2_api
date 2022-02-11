@@ -40,7 +40,8 @@ class Api::V1::WorksController < ApplicationController
       :date,
       :title,
       :description,
-      :scope_id
+      :scope_id,
+      images: []
     )
   end
 
