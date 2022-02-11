@@ -26,6 +26,19 @@ class Work < ApplicationRecord
 
   validates :creator_id,
     presence: true
+
+  validate :images_validate
+  def images_validate
+    # 必須入力
+    return errors.add(:images, :blank) unless images.attached?
+
+    # ファイルタイプ
+    allow_filetype = ['image/jpeg', 'image/png']
+    if images.attachments.any? { |attachment| !attachment.content_type.in?(allow_filetype) }
+      errors.add(:images, :invalid_file_type)
+    end
+  end
+
   # ----------------------------------------------------------------
 
   # 画像データのURL取得

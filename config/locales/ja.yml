@@ -1,7 +1,6 @@
 # https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/ja.yml
 ja:
   activerecord:
-    # ▼追加 -------------------------
     attributes:
       user:
         name: 名前
@@ -10,7 +9,6 @@ ja:
         password_confirmation: パスワード確認
         activated: アクティベイトフラグ
         admin: 管理者フラグ
-    # ▲ -----------------------------
     errors:
       messages:
         record_invalid: 'バリデーションに失敗しました: %{errors}'
@@ -127,9 +125,8 @@ ja:
   errors:
     format: "%{attribute}%{message}"
     messages:
-      # ▼ 追加 ------------------------------
       format_invalid: 書式が不正です
-      # ▲ -----------------------------------
+      invalid_file_type: 不正なファイル形式です
       accepted: 受諾してください
       blank: 入力してください
       confirmation: "%{attribute}と入力が一致しません"
