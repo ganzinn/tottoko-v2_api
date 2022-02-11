@@ -41,9 +41,15 @@ class Work < ApplicationRecord
 
   # ----------------------------------------------------------------
 
-  # 画像データのURL取得
-  def image_urls
-    # return nil unless images.attached?
+  # 一覧画面用画像データのURL取得
+  def index_image_url
+    return nil unless images.attached?
+    url_for(images.first.variant(resize:'300x300').processed)
+  end
+
+  # 詳細画面用画像データのURL取得
+  def detail_image_urls
+    return nil unless images.attached?
     images.map { |image| url_for(image) }
   end
 
