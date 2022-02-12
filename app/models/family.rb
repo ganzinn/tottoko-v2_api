@@ -13,6 +13,12 @@ class Family < ApplicationRecord
       in: ALLOW_VALUES_RELATION_ID,
       allow_blank: true
     }
+
+  validate :dup_check, if: -> { user.present? && creator.present?}
+  def dup_check
+    errors.add( :base, :taken ) if Family.find_by(user_id: user.id, creator_id: creator.id)
+  end
+
   # ----------------------------------------------------------------
 
   # クリエーター情報の編集・削除権限チェック
@@ -21,9 +27,15 @@ class Family < ApplicationRecord
     [1, 2, 3].include?(self.relation_id)
   end
 
-  # クリエーターの家族解除権限チェック
+  # 家族招待権限チェック
+  def family_create_permission_check
+    # パパ・ママ・本人のみ
+    [1, 2, 3].include?(self.relation_id)
+  end
+
+  # 家族解除権限チェック
   def family_remove_permission_check(cleator_family)
-    if self.creator_edit_permission_check
+    if self.family_create_permission_check
       # 自身がパパ・ママ・本人の場合、自身以外との関係を解除可能
       self.user_id != cleator_family.user_id
     else

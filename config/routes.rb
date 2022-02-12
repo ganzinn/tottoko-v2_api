@@ -23,7 +23,10 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :creators, only: [:show, :update, :destroy]
+      resources :creators, only: [:show, :update, :destroy] do
+        resources :families, only: [:create, :destroy]
+      end
+      
       resources :works, only: [:show, :update, :destroy]
     end
   end
