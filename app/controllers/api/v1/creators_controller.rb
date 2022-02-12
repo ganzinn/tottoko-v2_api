@@ -5,7 +5,7 @@ class Api::V1::CreatorsController < ApplicationController
   before_action :edit_permission_check, only: [:update, :destroy]
 
   def show
-    @creator_families = Family.where(creator_id: @creator.id).includes(:user)
+    @creator_families = Family.where(creator_id: @creator.id).order(:relation_id).includes(:user)
   end
 
   def update
@@ -40,7 +40,7 @@ class Api::V1::CreatorsController < ApplicationController
 
   def edit_permission_check
     # パパ・ママのみ
-    unless @family.creator_edit_permission_check
+    unless @family&.creator_edit_permission_check
       response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
     end
   end

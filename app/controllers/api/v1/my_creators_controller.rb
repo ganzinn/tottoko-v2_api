@@ -13,7 +13,7 @@ class Api::V1::MyCreatorsController < ApplicationController
   def index
     @my_creators = Creator.where(
       id: Family.where(user_id: authorize_user.id).select(:creator_id)
-    )
+    ).order(:date_of_birth)
   end
 
   private
