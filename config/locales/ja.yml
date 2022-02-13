@@ -147,7 +147,7 @@ ja:
       odd: 奇数にしてください
       other_than: "%{count}以外の値にしてください"
       present: 入力しないでください
-      required: 入力してください
+      required: 存在しません
       taken: すでに存在します
       too_long: "%{count}文字以内で入力してください"
       too_short: "%{count}文字以上で入力してください"
