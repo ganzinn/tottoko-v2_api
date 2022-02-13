@@ -47,7 +47,7 @@ class Api::V1::WorksController < ApplicationController
 
   def show_permission_check
     if authorize_user.present?
-      @family = Family.find_by!(user_id: authorize_user.id, creator_id: @work.creator_id)
+      @family = Family.find_by(user_id: authorize_user.id, creator_id: @work.creator_id)
       unless @work.scope_id == 4 || (@family && @work.scope.targets.include?(@family.relation_id))
         response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
       end
@@ -59,8 +59,8 @@ class Api::V1::WorksController < ApplicationController
   end
 
   def edit_permission_check
-    family = Family.find_by!(user_id: authorize_user.id, creator_id: @work.creator_id)
-    unless family.work_edit_permission_check
+    family = Family.find_by(user_id: authorize_user.id, creator_id: @work.creator_id)
+    unless family&.work_edit_permission_check
       response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
     end
   end
