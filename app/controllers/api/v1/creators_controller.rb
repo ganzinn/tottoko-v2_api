@@ -10,7 +10,7 @@ class Api::V1::CreatorsController < ApplicationController
 
   def update
     if @creator.update(creator_params)
-      render status: 200, json: {success: true, creator: {id: @creator.id }}
+      render status: 200, json: { success: true }
     else
       response_4XX(422, code: "unprocessable", messages: @creator.errors)
     end
@@ -18,7 +18,7 @@ class Api::V1::CreatorsController < ApplicationController
 
   def destroy
     if @creator.destroy
-      render status: 200, json: {success: true }
+      render status: 200, json: { success: true }
     else
       response_4XX(422, code: "unprocessable", messages: @creator.errors)
     end
