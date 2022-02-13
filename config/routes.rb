@@ -27,7 +27,9 @@ Rails.application.routes.draw do
         resources :families, only: [:create, :destroy]
       end
       
-      resources :works, only: [:show, :update, :destroy]
+      resources :works, only: [:show, :update, :destroy] do
+        resources :comments, only: [:create, :index, :update, :destroy]
+      end
     end
   end
 end

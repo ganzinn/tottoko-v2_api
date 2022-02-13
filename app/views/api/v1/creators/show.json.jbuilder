@@ -5,14 +5,14 @@ json.creator do
 end
 json.users do
   json.array! @creator_families do |creator_family|
-    json.user_id creator_family.user.id
-    json.user_name creator_family.user.name
-    json.relation do
-      json.id creator_family.relation.id
-      json.value creator_family.relation.value
-    end
+    json.id creator_family.user.id
+    json.name creator_family.user.name
     json.family do
       json.id creator_family.id
+      json.relation do
+        json.id creator_family.relation.id
+        json.value creator_family.relation.value
+      end
       json.family_remove_permission @family.family_remove_permission_check(creator_family)
     end
     

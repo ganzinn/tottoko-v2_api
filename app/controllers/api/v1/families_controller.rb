@@ -34,7 +34,7 @@ class Api::V1::FamiliesController < ApplicationController
       :email,
       :relation_id
     ).merge(
-      creator_id: params[:id]
+      creator_id: params[:creator_id]
     )
   end
 
