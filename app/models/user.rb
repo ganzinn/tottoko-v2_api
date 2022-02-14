@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :families, dependent: :destroy
   has_many :creators, through: :families
   has_many :comments
+  has_many :likes
 
   # バリデーション前処理
   before_validation :downcase_email

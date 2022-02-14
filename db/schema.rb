@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_02_12_091240) do
+ActiveRecord::Schema.define(version: 2022_02_13_133056) do
 
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
@@ -67,6 +67,15 @@ ActiveRecord::Schema.define(version: 2022_02_12_091240) do
     t.index ["user_id"], name: "index_families_on_user_id"
   end
 
+  create_table "likes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "work_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_likes_on_user_id"
+    t.index ["work_id"], name: "index_likes_on_work_id"
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", null: false
@@ -94,5 +103,7 @@ ActiveRecord::Schema.define(version: 2022_02_12_091240) do
   add_foreign_key "comments", "works"
   add_foreign_key "families", "creators"
   add_foreign_key "families", "users"
+  add_foreign_key "likes", "users"
+  add_foreign_key "likes", "works"
   add_foreign_key "works", "creators"
 end

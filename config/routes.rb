@@ -29,6 +29,9 @@ Rails.application.routes.draw do
       
       resources :works, only: [:show, :update, :destroy] do
         resources :comments, only: [:create, :index, :update, :destroy]
+        resource :like, only: [:create, :destroy] do
+          get :count
+        end
       end
     end
   end
