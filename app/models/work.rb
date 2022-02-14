@@ -7,6 +7,8 @@ class Work < ApplicationRecord
   has_many_attached :images
   has_many :comments, dependent: :destroy
   has_many :likes, dependent: :destroy
+  has_many :work_tag_relations, dependent: :destroy
+  has_many :tags, through: :work_tag_relations
 
   # バリデーション -------------------------------------------------
   validates :date,
