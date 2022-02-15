@@ -27,7 +27,9 @@ class Api::V1::CreatorsController < ApplicationController
   private
 
   def set_creator
-    @creator = Creator.find(params[:id]) # 存在しない場合、404
+    @creator = Creator.find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      response_4XX(404, code: "not_found", messages: {base: ['見つかりません']})
   end
 
   def show_permission_check
