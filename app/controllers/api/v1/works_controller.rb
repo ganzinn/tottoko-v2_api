@@ -9,10 +9,11 @@ class Api::V1::WorksController < ApplicationController
   end
 
   def update
-    if @work.update(work_params)
-      render status: 200, json: {success: true, work: {id: @work.id} }
+    work_tag_form = WorkTagForm.new(work_params, work: @work)
+    if work_tag_form.save
+      render status: 200, json: {success: true, work: {id: work_tag_form.work_id} }
     else
-      response_4XX(422, code: "unprocessable", messages: @work.errors)
+      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors)
     end
   end
 
@@ -32,7 +33,9 @@ class Api::V1::WorksController < ApplicationController
   end
 
   def set_work
-    @work = Work.find(params[:id]) # 存在しない場合、404
+    @work = Work.find(params[:id])
+    rescue ActiveRecord::RecordNotFound => e
+      response_4XX(404, code: "not_found", messages: {base: ['見つかりません']})
   end
 
   def work_params
@@ -41,7 +44,8 @@ class Api::V1::WorksController < ApplicationController
       :title,
       :description,
       :scope_id,
-      images: []
+      images: [],
+      tags:[]
     )
   end
 

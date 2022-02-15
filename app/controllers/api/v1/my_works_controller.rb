@@ -5,25 +5,25 @@ class Api::V1::MyWorksController < ApplicationController
   before_action :create_permission_check, only: [:create]
 
   def create
-    work = Work.new(work_params)
-    if work.save
-      render status: 201, json: {success: true, work: {id: work.id} }
+    work_tag_form = WorkTagForm.new(work_params)
+    if work_tag_form.save
+      render status: 201, json: {success: true, work: {id: work_tag_form.work_id} }
     else
-      response_4XX(422, code: "unprocessable", messages: work.errors)
+      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors)
     end
   end
 
   def index
+    # 閲覧可能なクリエーターの抽出。
+    my_creator_ids = Family.where(user_id: authorize_user.id).pluck(:creator_id)
+    select_my_creator_ids = my_creator_ids
+
     # ページネーション初期化
     page = params[:page] || 1
     per = params[:per] || 16
 
 
-    # 閲覧可能なクリエーターの抽出。
-    my_creator_ids = Family.where(user_id: authorize_user.id).pluck(:creator_id)
-    select_my_creator_ids = my_creator_ids
-
-    # クエリパラメータ（配列）で出力するクリエーターを絞り込み
+    # クエリパラメーター（配列）で出力するクリエーターを絞り込み
     if params[:creator_ids].present? && params[:creator_ids].instance_of?(Array)
       params[:creator_ids].map!(&:to_i) # 配列内の文字列を文字列から数値へ変換
       if (params[:creator_ids] - my_creator_ids).empty? # 対象のクリエーターが閲覧可能なクリエーターか確認
@@ -35,13 +35,30 @@ class Api::V1::MyWorksController < ApplicationController
 
     # 対象作品の取得
     my_work_ids = []
-    Work.joins('INNER JOIN families ON works.creator_id = families.creator_id')
-        .select('works.id AS id, families.id AS family_id, works.scope_id AS scope_id, families.relation_id AS relation_id')
+    Work.joins(:families)
+        .select('works.id AS id, works.scope_id AS scope_id, families.relation_id AS relation_id')
         .where(creator_id: select_my_creator_ids, families: { user_id: authorize_user.id })
         .find_each do |work|
           my_work_ids << work.id if work.scope_id == 4 || work.scope.targets.include?(work.relation_id)
         end
-    @my_works = Work.where(id: my_work_ids).order(date: :desc, updated_at: :desc).with_attached_images.includes(:creator).page(page).per(per)
+    @my_works = Work.where(id: my_work_ids)
+                    
+    # 条件絞り込み（タグAND条件）
+    if params[:tags].present?
+      tag_ids = Tag.where(name: params[:tags]).select(:id)
+      tag_ids.find_each do |tag_id|
+        @my_works = @my_works.where( id: WorkTagRelation.where( tag_id: tag_id).select(:work_id) )
+      end
+    end
+    
+    # インルード／ソート／ページネーション設定
+    @my_works = @my_works
+                .with_attached_images
+                # .with_all_variant_records # variantイメージ先読み（rails7.0から使用可能【課題】）
+                .includes(:creator)
+                .includes(:tags)
+                .order(date: :desc, updated_at: :desc)
+                .page(page).per(per)
 
     # ページネーション情報の取得
     @pagination = pagination(@my_works)
@@ -63,7 +80,8 @@ class Api::V1::MyWorksController < ApplicationController
       :description,
       :scope_id,
       :creator_id,
-      images: []
+      images: [],
+      tags: []
     )
   end
 end

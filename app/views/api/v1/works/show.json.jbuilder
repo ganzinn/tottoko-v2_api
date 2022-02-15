@@ -10,4 +10,5 @@ json.work do
   end
   json.detail_image_urls @work.detail_image_urls
   json.edit_permission (@family.present? && @family.work_edit_permission_check)
+  json.tags @work.tags.pluck(:name)
 end
