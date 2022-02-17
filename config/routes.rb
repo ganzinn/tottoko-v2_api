@@ -28,11 +28,13 @@ Rails.application.routes.draw do
       end
       
       resources :works, only: [:show, :update, :destroy] do
-        resources :comments, only: [:create, :index, :update, :destroy]
+        resources :comments, controller: :work_comments, only: [:create, :index]
         resource :like, only: [:create, :destroy] do
           get :count
         end
       end
+
+      resources :comments, only: [:update, :destroy]
     end
   end
 end
