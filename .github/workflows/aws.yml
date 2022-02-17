@@ -88,8 +88,8 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 
         mysql -u root -ppassword -h 127.0.0.1 << EOF
-            create user dbuser@% identified by password;
-            grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to dbuser@%;
+            create user dbuser identified by password;
+            grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to dbuser;
             select user, host, plugin from mysql.user where user = dbuser;
           EOF
 
