@@ -12,7 +12,7 @@ class Api::V1::CommentsController < ApplicationController
     if comment.save
       render status: 201, json: {success: true, comment: {id: comment.id }}
     else
-      response_4XX(422, code: "unprocessable", messages: @creator.errors)
+      response_4XX(422, code: "unprocessable", messages: comment.errors)
     end
   end
 
