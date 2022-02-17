@@ -1,0 +1,79 @@
+{
+    "executionRoleArn": "ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "name": "tottoko-api",
+            "image": "tottoko_api",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "hostPort": 3000,
+                    "protocol": "tcp",
+                    "containerPort": 3000
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/tottoko-prod-task",
+                    "awslogs-region": "ap-northeast-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "environment": [
+                {
+                    "name": "FRONT_URL",
+                    "value": "https://tottoko.su-dx.com"
+                },
+                {
+                    "name": "RAILS_LOG_TO_STDOUT",
+                    "value": "true"
+                },
+                {
+                    "name": "COOKIES_SAME_SITE",
+                    "value": "strict"
+                },
+                {
+                    "name": "RAILS_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "API_URL",
+                    "value": "https://tottoko-api.su-dx.com"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "valueFrom": "/tottoko_api-prod/RAILS_MASTER_KEY",
+                    "name": "RAILS_MASTER_KEY"
+                },
+                {
+                    "valueFrom": "/tottoko_api-prod/MYSQL_USER",
+                    "name": "MYSQL_USER"
+                },
+                {
+                    "valueFrom": "/tottoko_api-prod/MYSQL_PASSWORD",
+                    "name": "MYSQL_PASSWORD"
+                },
+                {
+                    "valueFrom": "/tottoko_api-prod/DB_HOST",
+                    "name": "DB_HOST"
+                }
+            ]
+        }
+    ],
+    "family": "tottoko-prod-task",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "runtimePlatform": {
+        "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "inferenceAccelerators": []
+}
