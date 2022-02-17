@@ -17,7 +17,7 @@ WORKDIR ${HOME}
 # COPY コピー元（ホスト） コピー先（コンテナ）
 # コピー元（ホスト） ...Dockerfileがあるディレクトリ以下を指定(api) ../ NG
 # コピー先（コンテナ） ...絶対パス or 相対パス
-COPY Gemfile* .
+COPY Gemfile* ./
 
 # 以下コマンドはベースのdockerから引き継いだバージョンから変更となるため実施しない
 #     # apk update : パッケージの最新リストを取得
