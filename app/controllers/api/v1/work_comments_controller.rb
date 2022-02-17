@@ -1,4 +1,4 @@
-class Api::V1::CommentsController < ApplicationController
+class Api::V1::WorkCommentsController < ApplicationController
   include Pagination
 
   before_action :access_token_validate
