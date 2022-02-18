@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  db:
+    image: mysql:8.0.25
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: --default-authentication-plugin=mysql_native_password
+
+  api:
+    # GithubActionsがイメージ名を設定
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      FRONT_URL: ${FRONT_URL}
+      API_URL: ${API_URL}
+      RAILS_ENV: ${RAILS_ENV}
+      RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
+      COOKIES_SAME_SITE: ${COOKIES_SAME_SITE}
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
