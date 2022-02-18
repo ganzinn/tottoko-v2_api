@@ -43,23 +43,12 @@ env:
 
 jobs:
 
-  CI-CD:
-    name: Test and Deploy
+  build:
+    name: build
     runs-on: ubuntu-latest
-    services:
-      db:
-        image: mysql:8.0.25
-        ports: 
-          - 127.0.0.1:3306:3306
-        env:
-          MYSQL_ROOT_PASSWORD: password
-        options: >-
-          --health-cmd "mysqladmin ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     environment: production
+    outputs:
+      docker-image: ${{ steps.build-image.image }}
 
     steps:
     - name: Checkout
@@ -76,18 +65,53 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Image Build and tagging
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
+        # Build a docker image
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-        mysql -u root -ppassword -h 127.0.0.1 << EOF
+  Test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+
+    container:
+      image: ${{ needs.build.outputs.docker-image }}
+      env:
+        MYSQL_USER: dbuser
+        MYSQL_PASSWORD: password
+        DB_HOST: db
+        RAILS_ENV: development
+        RAILS_LOG_TO_STDOUT: true
+        API_URL: http://localhost:3001
+        FRONT_URL: http://localhost:8080
+        COOKIES_SAME_SITE: lax
+        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+      ports:
+        - 127.0.0.1:3001:3000
+
+    services:
+      db:
+        image: mysql:8.0.25
+        ports: 
+          - 127.0.0.1:3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Migrate DB schema
+      run: |
+        mysql -u root -ppassword -h db << EOF
         create user 'dbuser'@'%' identified with mysql_native_password by 'password';
         grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to 'dbuser'@'%';
         select user, host, plugin from mysql.user where user = 'dbuser';
@@ -95,28 +119,29 @@ jobs:
 
         docker container ls -a
         docker -v
+        docker network ls
 
-        docker run --rm --add-host=host.docker.internal:172.17.0.1 -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=password -e DB_HOST=host.docker.internal -e RAILS_ENV=development -e RAILS_LOG_TO_STDOUT=true -e API_URL=http://localhost:3001 -e FRONT_URL=http://localhost:8080 -e COOKIES_SAME_SITE=lax -e RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG /bin/ash << EOF
+
         rails db:create
         rails db:migrate
         bundle exec rspec
-        EOF
 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.build-image.outputs.image }}
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: false # false → デプロイの結果を待たない設定（時間短縮）
+    # - name: Fill in the new image ID in the Amazon ECS task definition
+    #   id: task-def
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
+    #     container-name: ${{ env.CONTAINER_NAME }}
+    #     image: ${{ steps.build-image.outputs.image }}
+
+    # - name: Deploy Amazon ECS task definition
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #     service: ${{ env.ECS_SERVICE }}
+    #     cluster: ${{ env.ECS_CLUSTER }}
+    #     wait-for-service-stability: false # false → デプロイの結果を待たない設定（時間短縮）
