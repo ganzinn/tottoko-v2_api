@@ -29,7 +29,8 @@ COPY Gemfile* ./
     # --no-cache : パッケージをキャッシュしない（Dockerイメージを軽量化）
 RUN apk add --no-cache \
             tzdata \
-            mysql-client\
+            mysql-dev \
+            mysql-client \
             # pryで使用
             less \
             # credentials編集時に使用
