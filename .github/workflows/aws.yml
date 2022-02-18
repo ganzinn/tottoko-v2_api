@@ -94,8 +94,9 @@ jobs:
         EOF
 
         docker container ls -a
+        docker -v
 
-        docker run --rm --add-host=host.docker.internal:host-gateway -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=password -e DB_HOST=host.docker.internal -e RAILS_ENV=development -e RAILS_LOG_TO_STDOUT=true -e API_URL=http://localhost:3001 -e FRONT_URL=http://localhost:8080 -e COOKIES_SAME_SITE=lax -e RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG /bin/ash << EOF
+        docker run --rm --add-host=host.docker.internal:172.17.0.1 -e MYSQL_USER=dbuser -e MYSQL_PASSWORD=password -e DB_HOST=host.docker.internal -e RAILS_ENV=development -e RAILS_LOG_TO_STDOUT=true -e API_URL=http://localhost:3001 -e FRONT_URL=http://localhost:8080 -e COOKIES_SAME_SITE=lax -e RAILS_MASTER_KEY=${{ secrets.RAILS_MASTER_KEY }} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG /bin/ash << EOF
         rails db:create
         rails db:migrate
         bundle exec rspec
