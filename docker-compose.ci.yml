@@ -25,3 +25,13 @@ services:
       - db
     stdin_open: true
     tty: true
+    command: >
+      ash -c "mysql -u root -ppassword -h db << EOT
+      grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to 'dbuser'@'%';
+      select user, host, plugin from mysql.user where user = 'dbuser';
+      EOT
+      && rails db:create
+      && rails db:migrate
+      && bundle exec rspec"
+
+
