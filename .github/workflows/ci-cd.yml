@@ -50,6 +50,9 @@ jobs:
       TARGET_IMAGE: ${{ needs.build.outputs.docker-image }}
       RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
     - name: Build a test environment
       run: |
         docker compose -f docker-compose.ci.yml up db -d
@@ -57,6 +60,7 @@ jobs:
         docker compose -f docker-compose.ci.yml up api
         docker compose -f docker-compose.ci.yml run api rails db:create
         docker compose -f docker-compose.ci.yml run api rails db:migrate
+        
     - name: Test
       run: |
         docker compose -f docker-compose.ci.yml run api bundle exec rspec
