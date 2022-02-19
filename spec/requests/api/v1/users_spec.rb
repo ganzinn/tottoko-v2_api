@@ -23,7 +23,7 @@ RSpec.describe "Api::V1::Users", type: :request do
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           expect(response.status).to eq 201
-          expect(body_hash["success"]).to eq true
+          expect(body_hash["successa"]).to eq true
         end
       end
       it 'Usersレコードが１件追加され、activated属性が「false」であること' do
