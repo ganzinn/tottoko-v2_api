@@ -54,7 +54,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build test environment
-    - run: |
+      run: |
         docker compose -f docker-compose.ci.yml up db -d
         sleep 15 # DB起動待ち
         docker compose -f docker-compose.ci.yml up api
@@ -62,7 +62,7 @@ jobs:
         docker compose -f docker-compose.ci.yml run api rails db:migrate
 
     - name: Test image
-    - run: |
+      run: |
         docker compose -f docker-compose.ci.yml run api bundle exec rspec
 
   deploy:
