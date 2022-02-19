@@ -19,6 +19,7 @@ storage/*
 .dockerignore
 .env
 docker-compose.yml
+docker-compose.ci_local.yml
 Dockerfile
 README.md
 
@@ -27,3 +28,4 @@ README.md
 .local/share/pry/pry_history
 .lesshst
 .viminfo
+

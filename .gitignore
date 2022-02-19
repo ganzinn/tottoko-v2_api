@@ -31,3 +31,4 @@
 /.local/share/pry/pry_history
 /.lesshst
 /.viminfo
+/docker-compose.ci_local.yml
