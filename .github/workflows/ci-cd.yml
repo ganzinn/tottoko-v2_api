@@ -1,10 +1,8 @@
 name: Image build and Test, Deploy to Amazon ECS
-
 on:
   push:
     branches:
       - main
-
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY: tottoko_api
@@ -14,11 +12,12 @@ env:
   CONTAINER_NAME: tottoko-api
 
 jobs:
-  deploy:
-    name: Deploy
+  build:
+    name: Build
     runs-on: ubuntu-latest
     environment: production
-
+    outputs:
+      docker-image: ${{ steps.build-image.image }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -43,21 +42,33 @@ jobs:
         docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
         echo "::set-output name=image::${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
 
-    - name: Test
-      env:
-        TARGET_IMAGE: ${{ steps.build-image.outputs.image }}
-        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      TARGET_IMAGE: ${{ needs.build.outputs.docker-image }}
+      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+    steps:
+    - name: Build a test environment
       run: |
         docker compose -f docker-compose.ci.yml up db -d
         sleep 15 # DB起動待ち
         docker compose -f docker-compose.ci.yml up api
         docker compose -f docker-compose.ci.yml run api rails db:create
         docker compose -f docker-compose.ci.yml run api rails db:migrate
+    - name: Test
+      run: |
         docker compose -f docker-compose.ci.yml run api bundle exec rspec
-    
+  
+  deploy:
+    name: Deploy
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
     - name: Push image to Amazon ECR
       run: |
-        docker push ${{ steps.build-image.outputs.image }}
+        docker push ${{ needs.build.outputs.docker-image }}
         
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
@@ -65,7 +76,7 @@ jobs:
       with:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.build-image.outputs.image }}
+        image: ${{ needs.build.outputs.docker-image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -73,4 +84,4 @@ jobs:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: ${{ env.ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: false # false → デプロイの結果を待たない設定（時間短縮）
+        wait-for-service-stability: false # false(デプロイの結果を待たない）
