@@ -42,21 +42,11 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
 
-        MYSQL_ROOT_PASSWORD: password
-        MYSQL_USER: dbuser
-        MYSQL_PASSWORD: password
-        DB_HOST: db
-        FRONT_URL: http://localhost:8080
-        API_URL: http://localhost:3000
-        RAILS_ENV: development
-        RAILS_LOG_TO_STDOUT: true
-        COOKIES_SAME_SITE: lax
+        
         RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: |
-        # Build a docker container and
-        # push it to ECR so that it can
-        # be deployed to ECS.
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        env
 
 
         docker-compose -f docker-compose.ci.yml up -d
