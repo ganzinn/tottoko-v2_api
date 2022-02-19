@@ -12,8 +12,8 @@ env:
   CONTAINER_NAME: tottoko-api
 
 jobs:
-  build:
-    name: Build image
+  build-test-push:
+    name: Build image and test, push
     runs-on: ubuntu-latest
     environment: production
     outputs:
@@ -45,45 +45,34 @@ jobs:
         image_name="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
         echo "::set-output name=image_name::${image_name}"
 
-  test:
-    name: Test image
-    needs: build
-    runs-on: ubuntu-latest
-    env:
-      TARGET_IMAGE: ${{ needs.build.outputs.docker-image-name }}
-      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Build test environment
+    - name: Build test environment and test
+      env:
+        TARGET_IMAGE: ${{ steps.build-image.outputs.image }}
+        RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: |
         docker compose -f docker-compose.ci.yml up db -d
         sleep 15 # DB起動待ち
         docker compose -f docker-compose.ci.yml up api
         docker compose -f docker-compose.ci.yml run api rails db:create
         docker compose -f docker-compose.ci.yml run api rails db:migrate
-
-    - name: Test image
-      run: |
         docker compose -f docker-compose.ci.yml run api bundle exec rspec
+
+    - name: Push image to Amazon ECR
+      run: |
+        docker push ${{ steps.build-image.outputs.image }}
 
   deploy:
     name: Deploy to Amazon ECS
-    needs: [build, test]
+    needs: build-test-push
     runs-on: ubuntu-latest
     steps:
-    - name: Push image to Amazon ECR
-      run: |
-        docker push ${{ needs.build.outputs.docker-image }}
-        
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ needs.build.outputs.docker-image }}
+        image: ${{ needs.build-test-push.outputs.docker-image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
