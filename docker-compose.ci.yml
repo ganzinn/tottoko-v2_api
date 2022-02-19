@@ -11,8 +11,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password
 
   api:
-    # GithubActionsで作成したデプロイ用イメージを設定
-    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+    # GithubActionsで作成したデプロイ用イメージ
+    image: ${TARGET_IMAGE}
     environment:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}

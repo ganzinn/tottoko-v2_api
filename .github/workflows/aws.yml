@@ -6,14 +6,12 @@ on:
       - main
 
 env:
-  AWS_REGION: ap-northeast-1                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: tottoko_api                 # set this to your Amazon ECR repository name
-  ECS_SERVICE: tottoko-prod-service           # set this to your Amazon ECS service name
-  ECS_CLUSTER: tottoko-prod-cluster           # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: task-definition.json   # set this to the path to your Amazon ECS task definition
-                                              # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: tottoko-api                 # set this to the name of the container in the
-                                              # containerDefinitions section of your task definition
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: tottoko_api
+  ECS_SERVICE: tottoko-prod-service
+  ECS_CLUSTER: tottoko-prod-cluster
+  ECS_TASK_DEFINITION: task-definition.json
+  CONTAINER_NAME: tottoko-api
 
 jobs:
   deploy:
@@ -36,46 +34,48 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: build image
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
+        echo "::set-output name=image::${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
 
+    - name: Test
+      env:
+        TARGET_IMAGE: ${{ steps.build-image.outputs.image }}
         MYSQL_ROOT_PASSWORD: password
-        DB_PORT: 3308
         MYSQL_USER: dbuser
+        DB_PORT: 3308
         RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-
         docker-compose -f docker-compose.ci.yml up -d db
-        sleep 15
-
+        sleep 15 # DB起動待ち
         mysql -u root -p${MYSQL_ROOT_PASSWORD} -h 127.0.0.1 -P ${DB_PORT} << EOS
         grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to "${MYSQL_USER}"@'%';
         EOS
-
         docker-compose -f docker-compose.ci.yml run api rails db:create
         docker-compose -f docker-compose.ci.yml run api rails db:migrate
         docker-compose -f docker-compose.ci.yml run api bundle exec rspec
+    
+    - name: Push image to Amazon ECR
+      run: |
+        docker push ${{ steps.build-image.outputs.image }}
+        
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
 
-
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
-    # - name: Fill in the new image ID in the Amazon ECS task definition
-    #   id: task-def
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: ${{ env.ECS_TASK_DEFINITION }}
-    #     container-name: ${{ env.CONTAINER_NAME }}
-    #     image: ${{ steps.build-image.outputs.image }}
-
-    # - name: Deploy Amazon ECS task definition
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.task-def.outputs.task-definition }}
-    #     service: ${{ env.ECS_SERVICE }}
-    #     cluster: ${{ env.ECS_CLUSTER }}
-    #     wait-for-service-stability: false # false → デプロイの結果を待たない設定（時間短縮）
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: false # false → デプロイの結果を待たない設定（時間短縮）
