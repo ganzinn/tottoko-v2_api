@@ -53,7 +53,7 @@ jobs:
         sleep 15
 
         mysql -u root -p${MYSQL_ROOT_PASSWORD} -h 127.0.0.1 -P ${DB_PORT} << EOS
-        grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to \'${MYSQL_USER}\'@'%';
+        grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to "${MYSQL_USER}"@'%';
         EOS
 
         docker-compose -f docker-compose.ci.yml run api rails db:create
