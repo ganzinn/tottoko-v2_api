@@ -6,10 +6,12 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "127.0.0.1:${DB_PORT}:3306"
     command: --default-authentication-plugin=mysql_native_password
 
   api:
-    # GithubActionsがイメージ名を設定
+    # GithubActionsで作成したデプロイ用イメージを設定
     image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
     environment:
       MYSQL_USER: ${MYSQL_USER}
@@ -21,6 +23,8 @@ services:
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
       COOKIES_SAME_SITE: ${COOKIES_SAME_SITE}
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    ports:
+      - "${API_PORT}:3000"
     depends_on:
       - db
     stdin_open: true
