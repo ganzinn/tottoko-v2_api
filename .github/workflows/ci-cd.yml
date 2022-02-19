@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Image build and Test, Deploy to Amazon ECS
 
 on:
   push:
@@ -46,19 +46,14 @@ jobs:
     - name: Test
       env:
         TARGET_IMAGE: ${{ steps.build-image.outputs.image }}
-        MYSQL_ROOT_PASSWORD: password
-        MYSQL_USER: dbuser
-        DB_PORT: 3308
         RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: |
-        docker-compose -f docker-compose.ci.yml up -d db
+        docker compose -f docker-compose.ci.yml up db -d
         sleep 15 # DB起動待ち
-        mysql -u root -p${MYSQL_ROOT_PASSWORD} -h 127.0.0.1 -P ${DB_PORT} << EOS
-        grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to "${MYSQL_USER}"@'%';
-        EOS
-        docker-compose -f docker-compose.ci.yml run api rails db:create
-        docker-compose -f docker-compose.ci.yml run api rails db:migrate
-        docker-compose -f docker-compose.ci.yml run api bundle exec rspec
+        docker compose -f docker-compose.ci.yml up api
+        docker compose -f docker-compose.ci.yml run api rails db:create
+        docker compose -f docker-compose.ci.yml run api rails db:migrate
+        docker compose -f docker-compose.ci.yml run api bundle exec rspec
     
     - name: Push image to Amazon ECR
       run: |
