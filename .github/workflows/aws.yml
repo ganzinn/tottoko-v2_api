@@ -52,14 +52,13 @@ jobs:
         docker-compose -f docker-compose.ci.yml up -d db
         sleep 15
 
-        mysql -u root -p${MYSQL_ROOT_PASSWORD} -P ${DB_PORT} << EOS
+        mysql -u root -p${MYSQL_ROOT_PASSWORD} -h 127.0.0.1 -P ${DB_PORT} << EOS
         grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to \'${MYSQL_USER}\'@'%';
         EOS
 
-        # docker-compose -f docker-compose.ci.yml exec -T api mysql -u root -ppassword -h db -e "grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to 'dbuser'@'%';"
-        docker-compose -f docker-compose.ci.yml exec -T api rails db:create
-        docker-compose -f docker-compose.ci.yml exec -T api rails db:migrate
-        docker-compose -f docker-compose.ci.yml exec -T api bundle exec rspec
+        docker-compose -f docker-compose.ci.yml run api rails db:create
+        docker-compose -f docker-compose.ci.yml run api rails db:migrate
+        docker-compose -f docker-compose.ci.yml run api bundle exec rspec
 
 
     #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
