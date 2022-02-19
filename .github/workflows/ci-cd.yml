@@ -12,13 +12,10 @@ env:
   CONTAINER_NAME: tottoko-api
 
 jobs:
-  build-test-push:
-    name: Build image and test, push
+  build-test-deploy:
+    name: Image Build and test, push and deploy
     runs-on: ubuntu-latest
     environment: production
-    outputs:
-      docker-image: ${{ steps.build-image.outputs.image }}
-      docker-image-name: ${{ steps.build-image.outputs.image_name }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -42,8 +39,6 @@ jobs:
       run: |
         docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
         echo "::set-output name=image::${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-        image_name="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-        echo "::set-output name=image_name::${image_name}"
 
     - name: Build test environment and test
       env:
@@ -61,18 +56,13 @@ jobs:
       run: |
         docker push ${{ steps.build-image.outputs.image }}
 
-  deploy:
-    name: Deploy to Amazon ECS
-    needs: build-test-push
-    runs-on: ubuntu-latest
-    steps:
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: ${{ env.ECS_TASK_DEFINITION }}
         container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ needs.build-test-push.outputs.docker-image }}
+        image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
