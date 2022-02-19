@@ -43,7 +43,7 @@ jobs:
         docker build -t ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} .
         echo "::set-output name=image::${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
         image_name="${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
-        echo "::set-output name=image_name::image_name"
+        echo "::set-output name=image_name::${image_name}"
 
   test:
     name: Test image
