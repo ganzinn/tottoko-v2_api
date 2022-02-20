@@ -24,6 +24,8 @@ services:
       COOKIES_SAME_SITE: ${COOKIES_SAME_SITE}
       # GithubActionsの環境変数より代入
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+    volumes:
+      - "./tmp/test_result:/app/tmp/test_result"
     ports:
       - "${API_PORT}:3000"
     depends_on:
