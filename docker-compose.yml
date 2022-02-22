@@ -5,18 +5,16 @@ version: "3.8"
 services:
   # 開発時のみ使用
   db:
-    # AWS RDSのバージョンに合わせる
+    # 本番環境（AWS RDS）で使用できるバージョンに合わせる
     image: mysql:8.0.25
     # 環境変数を定義
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     # ボリューム定義
     volumes:
       # コンテナ専用領域と紐付け。db_dataは下記volumesで定義。
       - db_data:/var/lib/mysql
-    # 認証方式を8系以前のものに変更(AWS RDSデフォルト設定)
+    # ユーザー認証方式。本番環境（AWS RDS） のデフォルト設定に合わせる（Rails6もこの設定でないと接続できない）
     command: --default-authentication-plugin=mysql_native_password
     # 公開用ポートを指定
     ports:
@@ -36,6 +34,8 @@ services:
       # Dockerfileの格納先
       context: .
     environment:
+      MYSQL_ROOT: ${MYSQL_ROOT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: ${DB_HOST}
