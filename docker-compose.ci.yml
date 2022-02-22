@@ -1,29 +1,35 @@
 version: "3.8"
 services:
   db:
+    # 本番環境（AWS RDS）で使用できるバージョンに合わせる
     image: mysql:8.0.25
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
     ports:
       - "127.0.0.1:${DB_PORT}:3306"
+    # 本番環境（AWS RDS） のデフォルト設定に合わせる
     command: --default-authentication-plugin=mysql_native_password
 
   api:
     # GithubActionsの環境変数より代入（GithubActionsで作成したデプロイ用イメージ）
     image: ${TARGET_IMAGE}
     environment:
+      # [CI環境]GithubActionsのsecretsで設定  [本番]パラメーターストア（SecureString）に設定
+      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
+      # [CI環境].envファイルで設定  [本番]パラメーターストア（SecureString）に設定
+      MYSQL_ROOT: ${MYSQL_ROOT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       DB_HOST: ${DB_HOST}
+      # [CI環境].envファイルで設定  [本番]コンテナ定義に直接設定
       FRONT_URL: ${FRONT_URL}
       API_URL: ${API_URL}
       RAILS_ENV: ${RAILS_ENV}
       RAILS_LOG_TO_STDOUT: ${RAILS_LOG_TO_STDOUT}
       COOKIES_SAME_SITE: ${COOKIES_SAME_SITE}
-      # GithubActionsの環境変数より代入
-      RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
     volumes:
       - "./tmp/test_result:/app/tmp/test_result"
     ports:
@@ -32,6 +38,6 @@ services:
       - db
     stdin_open: true
     tty: true
-    command: >
-      mysql -u root -p${MYSQL_ROOT_PASSWORD} -h db
-        -e "grant select, insert, update, delete, create, drop, references, index, alter, trigger on *.* to '${MYSQL_USER}'@'%';"
+
+volumes:
+  db_data:
