@@ -7,7 +7,7 @@ class Api::V1::MeController < ApplicationController
   before_action :email_change_token_validate, only: [:email_change]
 
   def show
-    render json: {success: true, user: authorize_user.as_json(only: [:name, :email, :created_at])}
+    render json: {success: false, user: authorize_user.as_json(only: [:name, :email, :created_at])}
   end
 
   def activate
