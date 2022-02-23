@@ -36,4 +36,5 @@
 /.local/share/pry/pry_history
 /.lesshst
 /.viminfo
-/.vrfy.env
+/.env.vrfy
+/.mysql_history
