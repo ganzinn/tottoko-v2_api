@@ -112,15 +112,6 @@ Rails.application.configure do
   # config.active_record.database_resolver_context = ActiveRecord::Middleware::DatabaseSelector::Resolver::Session
 
   # AWS SES
-  creds = Aws::Credentials.new(
-    Rails.application.credentials.aws[:access_key_id],
-    Rails.application.credentials.aws[:secret_access_key]
-  )
-  Aws::Rails.add_action_mailer_delivery_method(
-    :ses,
-    credentials: creds,
-    region: Rails.application.credentials.dig(:aws, :ses, :region)
-  )
   config.action_mailer.delivery_method = :ses
 
 end
