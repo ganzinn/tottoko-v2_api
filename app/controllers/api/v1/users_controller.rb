@@ -6,7 +6,7 @@ class Api::V1::UsersController < ApplicationController
       user.send_activation_email
       render status: 201, json: {success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: user.errors)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 

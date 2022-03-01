@@ -16,7 +16,7 @@ class Api::V1::MeController < ApplicationController
       set_refresh_token
       render json: login_response_hash
     else
-      response_4XX(422, code: "unprocessable", messages: @user.errors)
+      response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
     end
   end
 
@@ -26,7 +26,7 @@ class Api::V1::MeController < ApplicationController
       user.forget
       render status: 200, json: {success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: user.errors)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 
@@ -37,7 +37,7 @@ class Api::V1::MeController < ApplicationController
       user.send_email_change_email
       render status: 200, json: {success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: user.errors)
+      response_4XX(422, code: "unprocessable", messages: user.errors.full_messages)
     end
   end
 
@@ -49,7 +49,7 @@ class Api::V1::MeController < ApplicationController
         set_refresh_token
         render json: login_response_hash
       else
-        response_4XX(422, code: "unprocessable", messages: @user.errors)
+        response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
       end
     else
       code = "password_error"

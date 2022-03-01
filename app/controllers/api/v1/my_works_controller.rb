@@ -9,7 +9,7 @@ class Api::V1::MyWorksController < ApplicationController
     if work_tag_form.save
       render status: 201, json: {success: true, work: {id: work_tag_form.work_id} }
     else
-      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors)
+      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors.full_messages)
     end
   end
 
@@ -29,7 +29,7 @@ class Api::V1::MyWorksController < ApplicationController
       if (params[:creator_ids] - my_creator_ids).empty? # 対象のクリエーターが閲覧可能なクリエーターか確認
         select_my_creator_ids = params[:creator_ids]
       else
-        response_4XX(400, code: "bad_request", messages: {base: ['存在しない、または権限がありません']}) and return
+        response_4XX(400, code: "bad_request", messages: ['存在しない、または権限がありません']) and return
       end
     end
 
@@ -69,7 +69,7 @@ class Api::V1::MyWorksController < ApplicationController
   def create_permission_check
     family = Family.find_by!(user_id: authorize_user.id, creator_id: work_params[:creator_id])
     unless family.work_edit_permission_check
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 

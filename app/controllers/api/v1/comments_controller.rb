@@ -9,7 +9,7 @@ class Api::V1::CommentsController < ApplicationController
     if @comment.update(update_comment_params)
       render status: 200, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @comment.errors)
+      response_4XX(422, code: "unprocessable", messages: @comment.errors.full_messages)
     end
   end
 
@@ -17,7 +17,7 @@ class Api::V1::CommentsController < ApplicationController
     if @comment.destroy
       render status: 200, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @comment.errors)
+      response_4XX(422, code: "unprocessable", messages: @comment.errors.full_messages)
     end
   end
 
@@ -26,7 +26,7 @@ class Api::V1::CommentsController < ApplicationController
   def set_comment
     @comment = Comment.find(params[:id])
     rescue ActiveRecord::RecordNotFound => e
-      response_4XX(404, code: "not_found", messages: {id: ['見つかりません']})
+      response_4XX(404, code: "not_found", messages: ['コメントが見つかりません'])
   end
 
   def edit_permission_check
@@ -34,7 +34,7 @@ class Api::V1::CommentsController < ApplicationController
     # その場合、自身が過去に投稿したコメントも見ることができなくなる。
     # ただし、APIとしては作品を閲覧できなくなってもコメントの編集・削除は可能とする。
     unless @comment.user_id == authorize_user.id
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 

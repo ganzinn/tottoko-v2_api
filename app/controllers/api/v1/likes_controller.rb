@@ -6,17 +6,17 @@ class Api::V1::LikesController < ApplicationController
     if like.save
       render status: 201, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: like.errors)
+      response_4XX(422, code: "unprocessable", messages: like.errors.full_messages)
     end
   end
 
   def destroy
     like = Like.find_by(work_id:params[:work_id], user_id: authorize_user.id)
-    response_4XX(404, code: "not_found", messages: {base: ['見つかりません']}) and return if like.blank?
+    response_4XX(404, code: "not_found", messages: ['見つかりません']) and return if like.blank?
     if like&.destroy
       render status: 200, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @like.errors)
+      response_4XX(422, code: "unprocessable", messages: @like.errors.full_messages)
     end
   end
 

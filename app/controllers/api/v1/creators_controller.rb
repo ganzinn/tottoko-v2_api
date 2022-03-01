@@ -12,7 +12,7 @@ class Api::V1::CreatorsController < ApplicationController
     if @creator.update(creator_params)
       render status: 200, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @creator.errors)
+      response_4XX(422, code: "unprocessable", messages: @creator.errors.full_messages)
     end
   end
 
@@ -20,7 +20,7 @@ class Api::V1::CreatorsController < ApplicationController
     if @creator.destroy
       render status: 200, json: { success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @creator.errors)
+      response_4XX(422, code: "unprocessable", messages: @creator.errors.full_messages)
     end
   end
 
@@ -29,21 +29,21 @@ class Api::V1::CreatorsController < ApplicationController
   def set_creator
     @creator = Creator.find(params[:id])
     rescue ActiveRecord::RecordNotFound => e
-      response_4XX(404, code: "not_found", messages: {base: ['見つかりません']})
+      response_4XX(404, code: "not_found", messages: ['見つかりません'])
   end
 
   def show_permission_check
     @family = Family.find_by(user_id: authorize_user.id, creator_id: @creator.id)
     # 家族のみ
     unless @family
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 
   def edit_permission_check
     # パパ・ママのみ
     unless @family&.creator_edit_permission_check
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 

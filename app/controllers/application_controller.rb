@@ -17,7 +17,7 @@ class ApplicationController < ActionController::API
     render(status: status, json: { success: false, code: code, messages: messages })
   end
 
-  def response_500(code: :internal_server_error, messages: {base: ["サーバー内部エラー"]} )
+  def response_500(code: :internal_server_error, messages: ["サーバー内部エラー"] )
     render(status: 500, json: { success: false, code: code, messages: messages })
   end
 end

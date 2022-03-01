@@ -10,7 +10,7 @@ class Api::V1::WorkCommentsController < ApplicationController
     if comment.save
       render status: 201, json: {success: true, comment: {id: comment.id }}
     else
-      response_4XX(422, code: "unprocessable", messages: comment.errors)
+      response_4XX(422, code: "unprocessable", messages: comment.errors.full_messages)
     end
   end
 
@@ -21,7 +21,7 @@ class Api::V1::WorkCommentsController < ApplicationController
 
     @comments = Comment.where( work_id: @work.id).order(:created_at).includes(:user).page(page).per(per)
     if @comments.blank?
-      response_4XX(404, code: "not_found", messages: {base: ['見つかりません']}) and return
+      response_4XX(404, code: "not_found", messages: ['見つかりません']) and return
     end
     @current_user_id = authorize_user.id
 
@@ -34,13 +34,13 @@ class Api::V1::WorkCommentsController < ApplicationController
   def set_work
     @work = Work.find(params[:work_id])
     rescue ActiveRecord::RecordNotFound => e
-      response_4XX(404, code: "not_found", messages: {work_id: ['見つかりません']})
+      response_4XX(404, code: "not_found", messages: ['見つかりません'])
   end
 
   def create_read_permission_check
     family = Family.find_by(user_id: authorize_user.id, creator_id: @work.creator_id)
     unless family && @work.scope.targets.include?(family.relation_id)
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 

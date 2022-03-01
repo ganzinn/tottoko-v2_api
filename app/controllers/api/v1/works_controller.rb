@@ -13,7 +13,7 @@ class Api::V1::WorksController < ApplicationController
     if work_tag_form.save
       render status: 200, json: {success: true, work: {id: work_tag_form.work_id} }
     else
-      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors)
+      response_4XX(422, code: "unprocessable", messages: work_tag_form.errors.full_messages)
     end
   end
 
@@ -21,7 +21,7 @@ class Api::V1::WorksController < ApplicationController
     if @work.destroy
       render status: 200, json: {success: true }
     else
-      response_4XX(422, code: "unprocessable", messages: @work.errors)
+      response_4XX(422, code: "unprocessable", messages: @work.errors.full_messages)
     end
   end
 
@@ -35,7 +35,7 @@ class Api::V1::WorksController < ApplicationController
   def set_work
     @work = Work.find(params[:id])
     rescue ActiveRecord::RecordNotFound => e
-      response_4XX(404, code: "not_found", messages: {base: ['見つかりません']})
+      response_4XX(404, code: "not_found", messages: ['見つかりません'])
   end
 
   def work_params
@@ -53,11 +53,11 @@ class Api::V1::WorksController < ApplicationController
     if authorize_user.present?
       @family = Family.find_by(user_id: authorize_user.id, creator_id: @work.creator_id)
       unless @work.scope_id == 4 || (@family && @work.scope.targets.include?(@family.relation_id))
-        response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+        response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
       end
     else
       unless @work.scope_id == 4
-        response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+        response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
       end
     end
   end
@@ -65,7 +65,7 @@ class Api::V1::WorksController < ApplicationController
   def edit_permission_check
     family = Family.find_by(user_id: authorize_user.id, creator_id: @work.creator_id)
     unless family&.work_edit_permission_check
-      response_4XX(401, code: "unauthorized", messages: {base: ['権限がありません']})
+      response_4XX(401, code: "unauthorized", messages: ['権限がありません'])
     end
   end
 

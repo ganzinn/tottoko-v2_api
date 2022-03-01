@@ -6,7 +6,7 @@ class Api::V1::MyCreatorsController < ApplicationController
     if creator_family_form.save
       render status: 201, json: {success: true, creator: {id: creator_family_form.creator_id} }
     else
-      response_4XX(422, code: "unprocessable", messages: creator_family_form.errors)
+      response_4XX(422, code: "unprocessable", messages: creator_family_form.errors.full_messages)
     end
   end
 

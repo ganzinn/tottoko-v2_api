@@ -125,33 +125,33 @@ ja:
   errors:
     format: "%{attribute}%{message}"
     messages:
-      format_invalid: 書式が不正です
-      invalid_file_type: 不正なファイル形式です
-      must_exist: 存在しません
-      accepted: 受諾してください
-      blank: 入力してください
-      confirmation: "%{attribute}と入力が一致しません"
-      empty: 入力してください
-      equal_to: "%{count}にしてください"
-      even: 偶数にしてください
-      exclusion: 予約されています
-      greater_than: "%{count}より大きい値にしてください"
-      greater_than_or_equal_to: "%{count}以上の値にしてください"
-      inclusion: 選択肢から指定してください
-      invalid: 不正な値です
-      less_than: "%{count}より小さい値にしてください"
-      less_than_or_equal_to: "%{count}以下の値にしてください"
+      format_invalid: の書式が不正です
+      invalid_file_type: は不正なファイル形式です
+      must_exist: は存在しません
+      accepted: を受諾してください
+      blank: を入力してください
+      confirmation: "は%{attribute}と入力が一致しません"
+      empty: を入力してください
+      equal_to: "は%{count}にしてください"
+      even: は偶数にしてください
+      exclusion: は予約されています
+      greater_than: "は%{count}より大きい値にしてください"
+      greater_than_or_equal_to: "は%{count}以上の値にしてください"
+      inclusion: は選択肢から指定してください
+      invalid: は不正な値です
+      less_than: "は%{count}より小さい値にしてください"
+      less_than_or_equal_to: "は%{count}以下の値にしてください"
       model_invalid: 'バリデーションに失敗しました: %{errors}'
-      not_a_number: 数値で入力してください
-      not_an_integer: 整数で入力してください
-      odd: 奇数にしてください
-      other_than: "%{count}以外の値にしてください"
-      present: 入力しないでください
-      required: 存在しません
-      taken: すでに存在します
-      too_long: "%{count}文字以内で入力してください"
-      too_short: "%{count}文字以上で入力してください"
-      wrong_length: "%{count}文字で入力してください"
+      not_a_number: は数値で入力してください
+      not_an_integer: は整数で入力してください
+      odd: は奇数にしてください
+      other_than: "は%{count}以外の値にしてください"
+      present: は入力しないでください
+      required: は存在しません
+      taken: はすでに存在します
+      too_long: "は%{count}文字以内で入力してください"
+      too_short: "は%{count}文字以上で入力してください"
+      wrong_length: "は%{count}文字で入力してください"
     template:
       body: 次の項目を確認してください
       header:
