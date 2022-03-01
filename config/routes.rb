@@ -3,19 +3,19 @@ Rails.application.routes.draw do
     resources :health_check, only: :index
 
     namespace :v1 do
-      namespace :sessions do
-        post :login
-        post :refresh
-        delete :logout
-      end
-
       resource :users, only: [:create] do
         post :password_reset_entry
+
+        resource :sessions, controller: :sessions, only: [] do
+          post :login
+          post :refresh
+          delete :logout
+        end
 
         resource :me, controller: :me, only: [:show] do
           put :activate
           put :password, to: 'me#password_reset'
-          post :email_change_entry, to: 'me#email_change_entry'
+          post :email_change_entry
           put :email, to: 'me#email_change'
 
           resources :creators, controller: :my_creators, only: [:create, :index]
