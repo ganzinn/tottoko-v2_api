@@ -130,7 +130,7 @@ ja:
       must_exist: は存在しません
       accepted: を受諾してください
       blank: を入力してください
-      confirmation: "は%{attribute}と入力が一致しません"
+      confirmation: "と%{attribute}の入力が一致しません"
       empty: を入力してください
       equal_to: "は%{count}にしてください"
       even: は偶数にしてください

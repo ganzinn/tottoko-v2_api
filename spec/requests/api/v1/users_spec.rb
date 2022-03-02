@@ -61,10 +61,8 @@ RSpec.describe "Api::V1::Users", type: :request do
           expect(response.status).to eq 422
           expect(body_hash["success"]).to eq false
           expect(body_hash["messages"].size).to be >= 1
-          body_hash["messages"].each{ |attr, messages|
-            messages.each{ |message|
-              expect(message).to be_kind_of(String)
-            }
+          body_hash["messages"].each{ |message|
+            expect(message).to be_kind_of(String)
           }
         end
       end

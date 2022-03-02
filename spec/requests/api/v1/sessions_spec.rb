@@ -5,7 +5,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
   #################################################
   ### ログイン
   #################################################
-  describe "ログイン 'POST /api/v1/sessions/login'" do
+  describe "ログイン 'POST /api/v1/users/sessions/login'" do
     before do
       @user = FactoryBot.build(:user)
       @user.activated = true
@@ -22,7 +22,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
             "password": "password"
           }
         }).to_json
-        post '/api/v1/sessions/login', headers: headers, params: json_params
+        post '/api/v1/users/sessions/login', headers: headers, params: json_params
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # レスポンスチェック
@@ -47,14 +47,14 @@ RSpec.describe "Api::V1::Sessions", type: :request do
             "password": "password_bbbb" # password相違
           }
         }).to_json
-        post '/api/v1/sessions/login', headers: headers, params: json_params
+        post '/api/v1/users/sessions/login', headers: headers, params: json_params
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # エラーレスポンス
           expect(response.status).to eq 401
           expect(body_hash["success"]).to eq false
           expect(body_hash["code"]).to eq "authenticate_fail"
-          expect(body_hash["messages"]["base"]).to match(["認証に失敗しました"])
+          expect(body_hash["messages"]).to match(["認証に失敗しました"])
           # リフレッシュトークンが付与されていないかチェック
           expect(cookies).to_not include("refresh_token")
         end
@@ -69,14 +69,14 @@ RSpec.describe "Api::V1::Sessions", type: :request do
             "password": "password"
           }
         }).to_json
-        post '/api/v1/sessions/login', headers: headers, params: json_params
+        post '/api/v1/users/sessions/login', headers: headers, params: json_params
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # エラーレスポンス
           expect(response.status).to eq 401
           expect(body_hash["success"]).to eq false
           expect(body_hash["code"]).to eq "authenticate_fail"
-          expect(body_hash["messages"]["base"]).to match(["認証に失敗しました"])
+          expect(body_hash["messages"]).to match(["認証に失敗しました"])
           # リフレッシュトークンが付与されていないかチェック
           expect(cookies).to_not include("refresh_token")
         end
@@ -102,7 +102,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           "password": "password"
         }
       }).to_json
-      post '/api/v1/sessions/login', headers: headers, params: json_params
+      post '/api/v1/users/sessions/login', headers: headers, params: json_params
       @access_token = JSON.parse(response.body)["token"]
       @refresh_token = cookies["refresh_token"]
       @before_refresh_jti = User.find(@user.id).refresh_jti
@@ -112,7 +112,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
         headers = {
           'Cookie': "refresh_token=#{@refresh_token}"
         }
-        post '/api/v1/sessions/refresh', headers: headers
+        post '/api/v1/users/sessions/refresh', headers: headers
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # レスポンスチェック
@@ -136,14 +136,14 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           'Cookie': "refresh_token=#{@refresh_token}"
         }
         travel_to (24.hour.from_now) do
-          post '/api/v1/sessions/refresh', headers: headers
+          post '/api/v1/users/sessions/refresh', headers: headers
           body_hash = JSON.parse(response.body)
           aggregate_failures do
             # レスポンスチェック
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "refresh_token_expired"
-            expect(body_hash["messages"]["base"]).to match(["RefreshToken の有効期限切れです"])
+            expect(body_hash["messages"]).to match(["RefreshToken の有効期限切れです"])
             # リフレッシュトークンが空となっているかチェック
             expect(cookies["refresh_token"]).to be_empty
             # refresh_jtiの更新チェック
@@ -173,7 +173,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           "password": "password"
         }
       }).to_json
-      post '/api/v1/sessions/login', headers: headers, params: json_params
+      post '/api/v1/users/sessions/login', headers: headers, params: json_params
       @access_token = JSON.parse(response.body)["token"]
       @refresh_token = cookies["refresh_token"]
       @before_refresh_jti = User.find(@user.id).refresh_jti
@@ -183,7 +183,7 @@ RSpec.describe "Api::V1::Sessions", type: :request do
         headers = {
           'Cookie': "refresh_token=#{@refresh_token}"
         }
-        delete '/api/v1/sessions/logout', headers: headers
+        delete '/api/v1/users/sessions/logout', headers: headers
         body_hash = JSON.parse(response.body)
         aggregate_failures do
           # レスポンスチェック
@@ -203,14 +203,14 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           'Cookie': "refresh_token=#{@refresh_token}"
         }
         travel_to (24.hour.from_now) do
-          post '/api/v1/sessions/refresh', headers: headers
+          post '/api/v1/users/sessions/refresh', headers: headers
           body_hash = JSON.parse(response.body)
           aggregate_failures do
             # レスポンスチェック
             expect(response.status).to eq 401
             expect(body_hash["success"]).to eq false
             expect(body_hash["code"]).to eq "refresh_token_expired"
-            expect(body_hash["messages"]["base"]).to match(["RefreshToken の有効期限切れです"])
+            expect(body_hash["messages"]).to match(["RefreshToken の有効期限切れです"])
             # リフレッシュトークンが空となっているかチェック
             expect(cookies["refresh_token"]).to be_empty
             # refresh_jtiが削除されていないかチェック（前回と同じrefresh_jti）
