@@ -8,6 +8,7 @@ class Api::V1::MeController < ApplicationController
 
   def show
     @user = authorize_user
+    render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :avatar_url)}
   end
 
   def update
