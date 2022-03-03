@@ -1,9 +1,11 @@
 class User < ApplicationRecord
+  include Rails.application.routes.url_helpers
 
   has_many :families, dependent: :destroy
   has_many :creators, through: :families
   has_many :comments
   has_many :likes
+  has_one_attached :avatar
 
   # バリデーション前処理
   before_validation :downcase_email
@@ -67,11 +69,6 @@ class User < ApplicationRecord
     self.update(activated: true) 
   end
 
-  # 共通のJSONレスポンス
-  def response_json(payload = {})
-    self.as_json(only: [:name, :email]).merge(payload).with_indifferent_access
-  end
-
   def send_activation_email
     UserMailer.account_activation(self).deliver_now
   end
@@ -82,6 +79,16 @@ class User < ApplicationRecord
 
   def send_email_change_email
     UserMailer.email_change(self).deliver_now
+  end
+
+  def avatar_url
+    return nil unless avatar.attached?
+    url_for(avatar)
+  end
+
+  def resize_avatar_url
+    return nil unless avatar.attached?
+    url_for(avatar.variant(resize:'100x100').processed)
   end
 
   private

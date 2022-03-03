@@ -24,7 +24,8 @@ class Api::V1::UsersController < ApplicationController
       :name,
       :email,
       :password,
-      :password_confirmation
+      :password_confirmation,
+      :avatar
     )
   end
 
