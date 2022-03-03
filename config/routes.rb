@@ -12,7 +12,7 @@ Rails.application.routes.draw do
           delete :logout
         end
 
-        resource :me, controller: :me, only: [:show] do
+        resource :me, controller: :me, only: [:show, :update] do
           put :activate
           put :password, to: 'me#password_reset'
           post :email_change_entry

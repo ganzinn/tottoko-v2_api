@@ -1,13 +1,22 @@
 class Api::V1::MeController < ApplicationController
   include LoginResponse
 
-  before_action :access_token_validate, only: [:show, :email_change_entry]
+  before_action :access_token_validate, only: [:show, :update, :email_change_entry]
   before_action :activate_token_validate, only: [:activate]
   before_action :password_reset_token_validate, only: [:password_reset]
   before_action :email_change_token_validate, only: [:email_change]
 
   def show
-    render json: {success: true, user: authorize_user.as_json(only: [:name, :email, :created_at])}
+    @user = authorize_user
+  end
+
+  def update
+    @user = authorize_user
+    if @user.update(user_update_params)
+      render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :resize_avatar_url)}
+    else
+      response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
+    end
   end
 
   def activate
@@ -59,6 +68,13 @@ class Api::V1::MeController < ApplicationController
   end
 
   private
+
+  def user_update_params
+    params.require(:user).permit(
+      :name,
+      :avatar
+    )
+  end
 
   def activate_token_validate
     activate_token = token_from_header
