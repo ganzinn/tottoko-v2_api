@@ -20,7 +20,6 @@ class Creator < ApplicationRecord
 
   ALLOW_VALUES_GENDER_ID = [1, 2, 3]
   validates :gender_id,
-    presence: true,
     inclusion: {
       in: ALLOW_VALUES_GENDER_ID,
       allow_blank: true
