@@ -35,6 +35,12 @@ Rails.application.routes.draw do
       end
 
       resources :comments, only: [:update, :destroy]
+
+      # 選択フィールド
+      resources :genders, only:[:index]
+      resources :relations, only:[:index]
+      resources :scopes, only:[:index]
+
     end
   end
 end
