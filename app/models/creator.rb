@@ -25,4 +25,14 @@ class Creator < ApplicationRecord
       allow_blank: true
     }
   # ----------------------------------------------------------------
+
+  def age
+    today = Time.zone.today
+
+    years = (today.strftime('%Y%m%d').to_i - date_of_birth.strftime('%Y%m%d').to_i) / 10_000.to_i
+    months = (today.strftime('%m%d').to_i - date_of_birth.strftime('%m%d').to_i) / 100.to_i
+    months += 12 if months.negative?
+    {'years'=> years, 'months'=> months}
+  end
+
 end
