@@ -36,7 +36,7 @@ module UserAuth
       rescue JWT::ExpiredSignature
         @@token_ins.token_expired_response(@response_4XX)
       rescue UserAuth::ActivatedUser
-        @@token_ins.token_invalid_response(@response_4XX)
+        already_activated_response
       rescue JWT::DecodeError, UserAuth::DecodeError => e
         @@token_ins.token_invalid_response(@response_4XX, e)
       end
@@ -44,6 +44,15 @@ module UserAuth
 
     def token_user
       @_token_user ||= self.class.decode(@token).user
+    end
+
+    private
+
+    def already_activated_response
+      code = "already_activated"
+      message = "アカウントは既に有効化されています"
+      messages = [message]
+      @response_4XX.call(401, code: code, messages: messages) 
     end
   end
   class ActivatedUser < UserAuth::DecodeError; end
