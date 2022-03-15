@@ -1,10 +1,12 @@
 class Creator < ApplicationRecord
+  include Rails.application.routes.url_helpers
   extend ActiveHash::Associations::ActiveRecordExtensions
   belongs_to_active_hash :gender
 
   has_many :families, dependent: :destroy
   has_many :users, through: :families
   has_many :works, dependent: :destroy
+  has_one_attached :avatar
 
   # バリデーション -------------------------------------------------
   validates :name,
@@ -33,6 +35,16 @@ class Creator < ApplicationRecord
     months = (today.strftime('%m%d').to_i - date_of_birth.strftime('%m%d').to_i) / 100.to_i
     months += 12 if months.negative?
     {'years'=> years, 'months'=> months}
+  end
+
+  def original_avatar_url
+    return nil unless avatar.attached?
+    url_for(avatar)
+  end
+
+  def avatar_url
+    return nil unless avatar.attached?
+    url_for(avatar.variant(resize:'100x100').processed)
   end
 
 end

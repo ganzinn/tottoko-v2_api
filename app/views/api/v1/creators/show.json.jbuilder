@@ -1,6 +1,9 @@
 json.success true
 json.creator do
-  json.partial! 'api/v1/creators/creator', creator: @creator
+  json.extract! @creator, :id, :name, :date_of_birth
+  json.age @creator.age
+  json.original_avatar_url @creator.original_avatar_url
+  # json.partial! 'api/v1/creators/creator', creator: @creator
   json.edit_permission @family.creator_edit_permission_check
 end
 json.users do

@@ -23,7 +23,8 @@ class Api::V1::MyCreatorsController < ApplicationController
       :name,
       :date_of_birth,
       :gender_id,
-      :relation_id
+      :relation_id,
+      :avatar
     ).merge(
       user_id: authorize_user.id
     )
