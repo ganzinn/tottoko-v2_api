@@ -8,13 +8,13 @@ class Api::V1::MeController < ApplicationController
 
   def show
     @user = authorize_user
-    render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :avatar_url)}
+    render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :original_avatar_url)}
   end
 
   def update
     @user = authorize_user
     if @user.update(user_update_params)
-      render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :resize_avatar_url)}
+      render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :avatar_url)}
     else
       response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
     end

@@ -81,12 +81,12 @@ class User < ApplicationRecord
     UserMailer.email_change(self).deliver_now
   end
 
-  def avatar_url
+  def original_avatar_url
     return nil unless avatar.attached?
     url_for(avatar)
   end
 
-  def resize_avatar_url
+  def avatar_url
     return nil unless avatar.attached?
     url_for(avatar.variant(resize:'100x100').processed)
   end
