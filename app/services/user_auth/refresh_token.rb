@@ -10,6 +10,7 @@ module UserAuth
           @@add_claim_for_jti.to_sym => jwt_id
         }
         override_lifetime = 1.day
+        # override_lifetime = 10.second
         @@token_ins.encode(user_id, add_payload: add_payload, override_lifetime: override_lifetime)
       end
 
@@ -49,6 +50,9 @@ module UserAuth
       rescue JWT::ExpiredSignature
         delete_cookie_token
         @@token_ins.token_expired_response(@response_4XX)
+      rescue UserAuth::InvalidJtiError
+        delete_cookie_token
+        invalid_jti_response
       rescue JWT::DecodeError, UserAuth::DecodeError => e
         delete_cookie_token
         @@token_ins.token_invalid_response(@response_4XX, e)
@@ -64,6 +68,14 @@ module UserAuth
     def delete_cookie_token
       @cookies.delete(:refresh_token)
     end
+
+    def invalid_jti_response
+      code = "refresh_jti_not_include"
+      message = "AccessTokenのリフレッシュセッションは既に切れています"
+      messages = [message]
+      @response_4XX.call(401, code: code, messages: messages) 
+    end
+    
   end
   class InvalidJtiError < UserAuth::DecodeError; end
 end
