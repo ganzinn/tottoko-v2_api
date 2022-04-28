@@ -6,7 +6,7 @@ class Api::V1::FamiliesController < ApplicationController
   def create
     target_user_family = UserFamilyForm.new(create_family_params)
     if target_user_family.save
-      render status: 201, json: {success: true}
+      render status: 201, json: {success: true, user_name: target_user_family.user_name}
     else
       response_4XX(422, code: "unprocessable", messages: target_user_family.errors.full_messages)
     end
