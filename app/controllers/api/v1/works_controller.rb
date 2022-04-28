@@ -40,6 +40,7 @@ class Api::V1::WorksController < ApplicationController
 
   def work_params
     params.require(:work).permit(
+      :creator_id,
       :date,
       :title,
       :description,
