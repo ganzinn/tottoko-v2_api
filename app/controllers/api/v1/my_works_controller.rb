@@ -20,7 +20,7 @@ class Api::V1::MyWorksController < ApplicationController
 
     # ページネーション初期化
     page = params[:page] || 1
-    per = params[:per] || 16
+    per = params[:per] || 12
 
 
     # クエリパラメーター（配列）で出力するクリエーターを絞り込み
