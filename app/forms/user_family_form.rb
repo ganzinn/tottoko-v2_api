@@ -2,6 +2,7 @@ class UserFamilyForm
   include ActiveModel::Model
   attr_accessor :email,
                 :user_id,
+                :user_name,
                 :creator_id
   
   attr_reader   :relation_id
@@ -32,7 +33,10 @@ class UserFamilyForm
   def save
     return if invalid?
 
-    user_id = User.find_by_activated(email)&.id
+    # user_id = User.find_by_activated(email)&.id
+    user = User.find_by_activated(email)
+    @user_name = user.name
+    @user_id = user.id
     Family.create!(
       user_id: user_id,
       creator_id: creator_id,
