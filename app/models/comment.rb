@@ -10,6 +10,7 @@ class Comment < ApplicationRecord
 
   # コメントの編集・削除権限チェック
   def edit_permission_check(target_user_id)
+    return false if target_user_id == nil
     self.user_id == target_user_id
   end
 
