@@ -19,7 +19,7 @@ module LoginResponse
       success: true,
       token: encode_access_token_ins.token,
       expires: encode_access_token_ins.payload[:exp],
-      user: @user.as_json(only: [:name, :email], methods: :avatar_url)
+      user: @user.as_json(only: [:id, :name, :email], methods: :avatar_url)
     }
     return hash
   end
