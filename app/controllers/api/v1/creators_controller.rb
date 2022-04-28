@@ -10,6 +10,7 @@ class Api::V1::CreatorsController < ApplicationController
 
   def update
     if @creator.update(creator_params)
+      @creator.avatar.purge if params[:regd_avatar_del]
       render status: 200, json: { success: true }
     else
       response_4XX(422, code: "unprocessable", messages: @creator.errors.full_messages)
@@ -51,7 +52,8 @@ class Api::V1::CreatorsController < ApplicationController
     params.require(:creator).permit(
       :name,
       :date_of_birth,
-      :gender_id
+      :gender_id,
+      :avatar
     )
   end
 end
