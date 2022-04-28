@@ -5,7 +5,8 @@ module UserAuth
 
     class << self
       def encode(user_id)
-        @@token_ins.encode(user_id)
+        # @@token_ins.encode(user_id, override_lifetime: 30.second)
+        @@token_ins.encode(user_id) # lifetimeデフォルト（30.minute）
       end
 
       def decode(token)
