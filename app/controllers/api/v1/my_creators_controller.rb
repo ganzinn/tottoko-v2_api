@@ -11,9 +11,16 @@ class Api::V1::MyCreatorsController < ApplicationController
   end
 
   def index
-    @my_creators = Creator.where(
-      id: Family.where(user_id: authorize_user.id).select(:creator_id)
-    ).order(:date_of_birth)
+    if params[:purp] === 'work_entry'
+      @my_creators = Creator.where(
+        # 関係性がパパ・ママ・子ども自身のみ
+        id: Family.where(user_id: authorize_user.id, relation_id: [1, 2, 3]).select(:creator_id)
+      ).order(:date_of_birth)
+    else
+      @my_creators = Creator.where(
+        id: Family.where(user_id: authorize_user.id).select(:creator_id)
+      ).order(:date_of_birth)
+    end
   end
 
   private
