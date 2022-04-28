@@ -16,7 +16,7 @@ class Family < ApplicationRecord
 
   validate :dup_check, if: -> { user.present? && creator.present?}
   def dup_check
-    errors.add( :base, :taken ) if Family.find_by(user_id: user.id, creator_id: creator.id)
+    errors.add( :base, :user_already_registered ) if Family.find_by(user_id: user.id, creator_id: creator.id)
   end
 
   # ----------------------------------------------------------------
@@ -35,6 +35,7 @@ class Family < ApplicationRecord
 
   # 家族解除権限チェック
   def family_remove_permission_check(cleator_family)
+    # binding.pry
     if self.family_create_permission_check
       # 自身がパパ・ママ・本人の場合、自身以外との関係を解除可能
       self.user_id != cleator_family.user_id
