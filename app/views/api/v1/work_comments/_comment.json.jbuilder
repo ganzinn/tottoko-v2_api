@@ -1,4 +1,4 @@
-json.extract! comment, :id, :message
+json.extract! comment, :id, :message, :created_at
 json.user do
   json.id comment.user&.id
   json.name comment.user&.name
