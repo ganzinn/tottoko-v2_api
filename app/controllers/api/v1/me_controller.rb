@@ -14,6 +14,7 @@ class Api::V1::MeController < ApplicationController
   def update
     @user = authorize_user
     if @user.update(user_update_params)
+      @user.avatar.purge if params[:regd_avatar_del]
       render status: 200, json: { success: true, user: @user.as_json(only: [:name, :email], methods: :avatar_url)}
     else
       response_4XX(422, code: "unprocessable", messages: @user.errors.full_messages)
