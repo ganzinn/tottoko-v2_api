@@ -46,7 +46,7 @@ jobs:
         RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
       run: |
         docker compose -f docker-compose.ci.yml up db -d
-        sleep 60 # DB起動待ち
+        sleep 40 # DB起動待ち
         docker compose -f docker-compose.ci.yml run --entrypoint entrypoint_setup.sh --rm -T api \
           bundle exec rspec --force-color --format d --format h --out /app/tmp/test_result/rspec.html
 
