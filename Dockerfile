@@ -52,8 +52,8 @@ RUN apk add --no-cache \
 # . ...Dockerfileがあるディレクトリ全てのファイル（サブディレクトリも含む）
 COPY . .
 # 起動用シェルに実行権限付与
-COPY entrypoint.sh entrypoint_setup.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh /usr/bin/entrypoint_setup.sh
+COPY entrypoint.sh entrypoint_setup.sh entrypoint_setup_ci.sh /usr/bin/
+RUN chmod +x /usr/bin/entrypoint.sh /usr/bin/entrypoint_setup.sh entrypoint_setup_ci.sh
 # コンテナ内で実行したいコマンドを定義
 # ...ENTRYPOINT ["entrypoint.sh"] 本コマンド実行前に実施したい事前処理をシェルに記載
 ENTRYPOINT ["entrypoint.sh"]
