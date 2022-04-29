@@ -20,6 +20,9 @@
                     "awslogs-stream-prefix": "ecs"
                 }
             },
+            "entryPoint": [
+                "entrypoint_setup.sh"
+            ],
             "environment": [
                 {
                     "name": "FRONT_URL",
