@@ -2,6 +2,6 @@
 
 ようこそ tottoko アプリケーションへ！
 
-<%= @lifetime_text %>以内に下記リンクをクリックしてして、登録したアカウントを有効化してください。
+<%= @lifetime_text %>以内に下記リンクをクリックして、登録したアカウントを有効化してください。
 
 <%= ENV["FRONT_URL"] + "/users/me/activate?token=" + @encode_token_ins.token %>
