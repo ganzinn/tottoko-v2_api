@@ -3,7 +3,7 @@ module LoginResponse
 
   def set_refresh_token
     encode_refresh_token_ins = UserAuth::RefreshToken.encode(@user.id)
-    @user.remember_jti!(encode_refresh_token_ins.payload[:jti])
+    @user.remember_jti!(encode_refresh_token_ins)
     cookies.delete(:refresh_token)
     cookies[:refresh_token] = {
       value: encode_refresh_token_ins.token,

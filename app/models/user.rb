@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   include Rails.application.routes.url_helpers
 
+  serialize :refresh_jti, Hash
+
   has_many :families, dependent: :destroy
   has_many :creators, through: :families
   has_many :comments
@@ -57,8 +59,13 @@ class User < ApplicationRecord
     User.where(email: email, activated: true).where.not(id: self.id).take.present?
   end
 
-  def remember_jti!(refresh_jti)
-    self.update!(refresh_jti: refresh_jti)
+  def remember_jti!(encode_refresh_token_ins)
+    new_refresh_jti = encode_refresh_token_ins.payload[:jti]
+    exp = encode_refresh_token_ins.payload[:exp]
+    now = DateTime.now.to_i
+    filter_refresh_jti = self.refresh_jti.filter{|_, value| value > now }
+    filter_refresh_jti.store(new_refresh_jti, exp)
+    self.update!(refresh_jti: filter_refresh_jti)
   end
 
   def forget

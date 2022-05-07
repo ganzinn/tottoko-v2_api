@@ -193,7 +193,8 @@ RSpec.describe "Api::V1::Sessions", type: :request do
           expect(cookies["refresh_token"]).to be_empty
           # refresh_jtiの削除チェック
           after_refresh_jti = User.find(@user.id).refresh_jti
-          expect(after_refresh_jti).to eq nil
+          empty_hash = {}
+          expect(after_refresh_jti).to eq empty_hash
         end
       end
     end

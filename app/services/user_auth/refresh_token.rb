@@ -31,7 +31,7 @@ module UserAuth
 
       def verify_jti(user, payload_jti)
         expected_jti = user.refresh_jti
-        if payload_jti != expected_jti
+        unless expected_jti.has_key?(payload_jti)
           raise(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{payload_jti || '<none>'} not included session")
         end
       end

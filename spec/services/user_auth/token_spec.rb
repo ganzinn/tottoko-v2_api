@@ -110,7 +110,7 @@ RSpec.describe 'トークン検証', type: :model do
     before do
       @encode_token_ins = UserAuth::RefreshToken.encode(@user.id)
       @lifetime = @encode_token_ins.lifetime
-      @user.remember_jti!(@encode_token_ins.payload[:jti])
+      @user.remember_jti!(@encode_token_ins)
     end
     it '有効期限が1日であること' do
       expect(@lifetime).to match(1.day)
@@ -137,11 +137,11 @@ RSpec.describe 'トークン検証', type: :model do
         UserAuth::RefreshToken.decode(@encode_token_ins.token)
       end.not_to raise_error
     end
-    it 'トークンのjtiがUsersテーブルのrefresh_jtiと異なる場合、デコード時に例外「UserAuth::InvalidJtiError」が発生し、messageが「Invalid refresh_jti. Received <トークンのjti> not included session」となること' do
-      @user.remember_jti!("invalid")
+    it 'トークンのjtiがUsersテーブルのrefresh_jtiに含まれない場合、デコード時に例外「UserAuth::InvalidJtiError」が発生し、messageが「Invalid refresh_jti. Received <トークンのjti> not included session」となること' do
+      invalid_encode_token_ins = UserAuth::RefreshToken.encode(@user.id)
       expect do
-        UserAuth::RefreshToken.decode(@encode_token_ins.token)
-      end.to raise_error(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{@encode_token_ins.payload[:jti] } not included session")
+        UserAuth::RefreshToken.decode(invalid_encode_token_ins.token)
+      end.to raise_error(UserAuth::InvalidJtiError, "Invalid refresh_jti. Received #{invalid_encode_token_ins.payload[:jti] } not included session")
     end
   end
   context 'ActivateToken' do
